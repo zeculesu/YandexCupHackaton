@@ -11,7 +11,8 @@ class Sender:
 
     def send_command(self, command: str):
         try:
-            command = bytes.fromhex(Sender.header + command + Sender.header)
+            cur_command = bytes.fromhex(Sender.header + command + Sender.header)
+            # print(cur_command)
             # Создаем сокет
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(5)
@@ -20,7 +21,7 @@ class Sender:
             s.connect((self.host, self.port))
 
             # Отправляем команду
-            s.sendall(command)
+            s.sendall(cur_command)
 
             # Добавляем небольшой задержку между отправками команд
             time.sleep(1)
