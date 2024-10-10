@@ -7,14 +7,12 @@ port = 2001
 def go_moves(sender: Sender, param, n):
     sender.send_command("0201" + n)
     sender.send_command("0202" + n)
-    if param == "forward":
-        sender.send_command("000100")
-    elif param == "reverse":
-        sender.send_command("000200")
-    elif param == "left":
-        sender.send_command("000300")
-    elif param == "right":
-        sender.send_command("000400")
+    command_code = {"forward": "000100",
+                    "reverse": "000200",
+                    "left": "000300",
+                    "right": "000400"}
+    if param in command_code:
+        sender.send_command(command_code[param])
 
 
 def arm_moves(sender: Sender, param):
@@ -27,17 +25,14 @@ def arm_moves(sender: Sender, param):
 
 
 def arm_down(sender: Sender):
-    sender.send_command("0102ff")
-    sender.send_command("010355")
-    sender.send_command("010155")
-    sender.send_command("010400")
+    for command in ["0102ff", "010355", "010155", "010400"]:
+        sender.send_command(command)
 
 
 def arm_up(sender: Sender):
-    sender.send_command("010199")
-    sender.send_command("010210")
-    sender.send_command("010355")
-    sender.send_command("010400")
+    for command in ["010199", "010210", "010355", "010400"]:
+        sender.send_command(command)
+
 
 def arm_grab(sender: Sender):
     sender.send_command("010470")
@@ -56,7 +51,7 @@ def main(sender: Sender):
             else:
                 sender.send_command(''.join(command))
         except Exception as e:
-            print("something went wrong:", e)
+            print("Something went wrong:", e)
         command = input().split()
 
 
