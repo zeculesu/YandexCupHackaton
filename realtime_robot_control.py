@@ -25,12 +25,12 @@ def arm_moves(sender: Sender, param):
 
 
 def arm_down(sender: Sender):
-    for command in ["0102ff", "010355", "010155", "010400"]:
+    for command in ["0102ff", "010355", "010155", "010420"]:
         sender.send_command(command)
 
 
 def arm_up(sender: Sender):
-    for command in ["010199", "010210", "010355", "010400"]:
+    for command in ["010199", "010210", "010355", "010420"]:
         sender.send_command(command)
 
 
