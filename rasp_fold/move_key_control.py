@@ -1,7 +1,20 @@
+from time import sleep
+
 import motor_controller
+import servo_controller
 
 commands = ["forward", "backward", "right_on_place", "left_on_place", "right", "left"]
 mc = motor_controller.MotorController()
+
+while True:
+    sc = servo_controller.ServoController()
+    sleep(5)
+    sc.open_claw()
+    sc.set_down_position()
+    sleep(5)
+    sc.set_throw_position()
+    sc.open_claw()
+    sleep(5)
 
 while True:
     inp_command = input().split()
