@@ -1,54 +1,54 @@
-from YandexCupHackaton.rasp_fold import xr_motor
+from .. import xr_motor
 from time import sleep
 
 STEP_TIME = 0.2
 DEFAULT_SPEED = 30
 robotDir = xr_motor.RobotDirection()
+robotDir.stop()
 
 
 def forward(n):
-    robotDir.set_speed(1, DEFAULT_SPEED)
-    robotDir.set_speed(2, DEFAULT_SPEED)
+    set_speed(DEFAULT_SPEED, DEFAULT_SPEED)
     robotDir.forward()
     sleep(STEP_TIME * n)
     robotDir.stop()
 
 
 def backward(n):
-    robotDir.set_speed(1, DEFAULT_SPEED)
-    robotDir.set_speed(2, DEFAULT_SPEED)
+    set_speed(DEFAULT_SPEED, DEFAULT_SPEED)
     robotDir.back()
     sleep(STEP_TIME * n)
     robotDir.stop()
 
 
 def right_on_place(n):
-    robotDir.set_speed(1, DEFAULT_SPEED)
-    robotDir.set_speed(2, DEFAULT_SPEED)
+    set_speed(DEFAULT_SPEED, DEFAULT_SPEED)
     robotDir.right()
     sleep(STEP_TIME * n)
     robotDir.stop()
 
 
 def left_on_place(n):
-    robotDir.set_speed(1, DEFAULT_SPEED)
-    robotDir.set_speed(2, DEFAULT_SPEED)
+    set_speed(DEFAULT_SPEED, DEFAULT_SPEED)
     robotDir.left()
     sleep(STEP_TIME * n)
     robotDir.stop()
 
 
 def right(n):
-    robotDir.set_speed(1, DEFAULT_SPEED)
-    robotDir.set_speed(2, 0)
+    set_speed(DEFAULT_SPEED, 0)
     robotDir.left()
     sleep(STEP_TIME * n)
     robotDir.stop()
 
 
 def left(n):
-    robotDir.set_speed(1, 0)
-    robotDir.set_speed(2, DEFAULT_SPEED)
+    set_speed(0, DEFAULT_SPEED)
     robotDir.left()
     sleep(STEP_TIME * n)
     robotDir.stop()
+
+
+def set_speed(left_motor, right_motor):
+    robotDir.set_speed(1, left_motor)
+    robotDir.set_speed(2, right_motor)
