@@ -1,5 +1,3 @@
-
-
 import RPi.GPIO as GPIO
 
 # 设置引脚模式
@@ -10,21 +8,21 @@ GPIO.setmode(GPIO.BCM)
 BUZZER = 10
 
 # 设置电机引脚
-ENA = 13  	# //L298使能A
-ENB = 20  	# //L298使能B
-IN1 = 16  	# //电机接口1
-IN2 = 19  	# //电机接口2
-IN3 = 26  	# //电机接口3
-IN4 = 21  	# //电机接口4
+ENA = 13  # //L298使能A
+ENB = 20  # //L298使能B
+IN1 = 16  # //电机接口1
+IN2 = 19  # //电机接口2
+IN3 = 26  # //电机接口3
+IN4 = 21  # //电机接口4
 
 # 设置超声波引脚
-ECHO = 4  	# 超声波接收脚位
-TRIG = 17  	# 超声波发射脚位
+ECHO = 4  # 超声波接收脚位
+TRIG = 17  # 超声波发射脚位
 
 # 设置红外引脚
-IR_R = 18  	# 小车右侧巡线红外
-IR_L = 27  	# 小车左侧巡线红外
-IR_M = 22  	# 小车中间避障红外
+IR_R = 18  # 小车右侧巡线红外
+IR_L = 27  # 小车左侧巡线红外
+IR_M = 22  # 小车中间避障红外
 IRF_R = 25  # 小车跟随右侧红外
 IRF_L = 1  # 小车跟随左侧红外
 
@@ -49,33 +47,23 @@ GPIO.setup(IR_M, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(IRF_R, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(IRF_L, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 # 超声波脚初始化使能
-GPIO.setup(TRIG, GPIO.OUT, initial=GPIO.LOW)  			# 超声波模块发射端管脚设置trig
-GPIO.setup(ECHO, GPIO.IN, pull_up_down=GPIO.PUD_UP)  	# 超声波模块接收端管脚设置echo
+GPIO.setup(TRIG, GPIO.OUT, initial=GPIO.LOW)  # 超声波模块发射端管脚设置trig
+GPIO.setup(ECHO, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 超声波模块接收端管脚设置echo
 # 蜂鸣器脚初始化使能
-GPIO.setup(BUZZER, GPIO.OUT, initial=GPIO.LOW)			# 蜂鸣器设置为低电平
+GPIO.setup(BUZZER, GPIO.OUT, initial=GPIO.LOW)  # 蜂鸣器设置为低电平
 
 
 def digital_write(gpio, status):
-	"""
-	设置gpio端口为电平
-	参数：gpio为设置的端口，status为状态值只能为True(高电平)，False(低电平)
-	"""
-	GPIO.output(gpio, status)
+    GPIO.output(gpio, status)
+
 
 def digital_read(gpio):
-	"""
-	读取gpio端口的电平
-	"""
-	return GPIO.input(gpio)
+    return GPIO.input(gpio)
+
 
 def ena_pwm(pwm):
-	"""
-	设置电机调速端口ena的pwm
-	"""
-	ENA_pwm.ChangeDutyCycle(pwm)
+    ENA_pwm.ChangeDutyCycle(pwm)
+
 
 def enb_pwm(pwm):
-	"""
-	设置电机调速端口enb的pwm
-	"""
-	ENB_pwm.ChangeDutyCycle(pwm)
+    ENB_pwm.ChangeDutyCycle(pwm)

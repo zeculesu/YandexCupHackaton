@@ -1,7 +1,6 @@
 from time import sleep
 
-import motor_controller
-import servo_controller
+from YandexCupHackaton.rasp_fold.main_dir import servo, motor
 
 commands = ["forward", "backward", "right_on_place", "left_on_place", "right", "left"]
 mc = motor_controller.MotorController()
