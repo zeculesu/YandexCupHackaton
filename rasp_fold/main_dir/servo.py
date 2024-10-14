@@ -12,7 +12,7 @@ def angle_limit(angle):
 
 class ServoController(object):
     cur_main_angle = cfg.MAIN_UP
-    cur_cubit_angle = cfg.CUBIT_UP
+    cur_cubit_angle = cfg.CUBIT_DEFAULT
     cur_wrist_angle = cfg.WRIST_ROTATED
     cur_claw_angle = cfg.OPENED_CLAW
 
@@ -24,7 +24,7 @@ class ServoController(object):
 
     def set_default_position(self):
         self.cur_main_angle = cfg.MAIN_UP
-        self.cur_cubit_angle = cfg.CUBIT_UP
+        self.cur_cubit_angle = cfg.CUBIT_DEFAULT
         self.cur_wrist_angle = cfg.WRIST_ROTATED
         self.set_position()
 
@@ -44,7 +44,7 @@ class ServoController(object):
 
     def set_down_position(self):
         self.cur_main_angle = cfg.MAIN_DOWN
-        self.cur_cubit_angle = cfg.CUBIT_DOWN
+        self.cur_cubit_angle = cfg.CUBIT_DEFAULT
         self.cur_wrist_angle = cfg.WRIST_STRAIGHT
         self.set_position()
 
