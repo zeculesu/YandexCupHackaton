@@ -1,4 +1,6 @@
 # Buzzer
+from tkinter import YView
+
 BEET_SPEED = 50
 CLAPPER = 4
 
@@ -37,3 +39,16 @@ STEP_TIME = 0.1
 DEFAULT_SPEED = 50
 
 
+# RGB Panels
+RGB_POWER = 1
+RGB_PANEL = 2
+
+BLACK = 0
+RED = 1
+YELLOW = 2
+SALAD = 3
+GREEN = 4
+LIGHT_BLUE = 5
+BLUE = 6
+PURPLE = 7
+WHITE = 8
