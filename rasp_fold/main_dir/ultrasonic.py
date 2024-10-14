@@ -20,10 +20,9 @@ def get_distance():
             break
     t2 = time.time()
     distance = (t2 - t1) * 340 / 2 * 100
-    print("distance is %d" % distance)
     if distance < 500:
         print("distance is %d" % distance)
         return round(distance, 2)
     else:
-        print("distance is 0")  # 如果距离值大于5m,超出检测范围
-        return 0
+        print("distance is -1")  # 如果距离值大于5m,超出检测范围
+        return -1

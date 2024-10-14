@@ -1,73 +1,44 @@
-from time import sleep
+from motor import MotorController
+import infrared
+import buzzer
+from manipulator import ManipulatorController
 
-import motor
-import manipulator
-import camera
-
-mc = motor.MotorController()
-manipulator_cont = manipulator.ManipulatorController()
-camera_cont = camera.CameraController()
-
-# command = int(input())
-# while command != 0:
-#     sc.set(8, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(7, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(6, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(5, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(4, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(3, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(2, command)
-#     command = int(input())
-#
-# command = int(input())
-# while command != 0:
-#     sc.set(1, command)
-#     command = int(input())
-
-mc.forward_on_steps(3)
-mc.right_on_place_on_steps(3)
-mc.left_on_place_on_steps(3)
-mc.backward_on_steps(3)
-
-# sc.open_claw()
-# sc.set_default_position()
-# sleep(2)
-# sc.set_down_position()
-# sc.open_claw()
-# sleep(2)
-# sc.set_throw_position()
-
+manipulator = ManipulatorController()
+motor = MotorController()
+beep = buzzer.Buzzer()
+step = 2
+waiting = False
 while True:
-    camera_cont.move_cubit(50)
-    sleep(1)
-    camera_cont.move_rotate(50)
-    sleep(1)
-    camera_cont.move_rotate(-50)
-    sleep(1)
-    camera_cont.move_cubit(-50)
-    sleep(1)
+    left_ir, right_ir, middle_ir = infrared.get_left_value(), infrared.get_right_value(), infrared.get_middle_value()
+    left_line_ir, right_line_ir = infrared.get_left_line_value(), infrared.get_right_line_value()
+    if left_ir and right_ir and middle_ir:
+        waiting = False
 
+    if left_line_ir == 0:
+        motor.left_forward(step)
+    if right_line_ir == 0:
+        motor.right_forward(step)
+    if not (left_line_ir or right_line_ir):
+        motor.backward(8)
+        motor.right_backward(8)
+        
+    if left_ir == 0:
+        motor.stop()
+        if middle_ir == 1:
+            waiting = False
+            motor.backward(10)
+        else:
+            waiting = True
+            beep.play_music(0, beep.melody_Happy_birthday, beep.beet_Happy_birthday)
+        motor.left_on_place(step * 8)
+    if right_ir == 0:
+        motor.stop()
+        if middle_ir == 1:
+            waiting = False
+            motor.backward(15)
+        else:
+            waiting = True
+            beep.play_music(0, beep.melody_Happy_birthday, beep.beet_Happy_birthday)
+        motor.right_on_place(step * 8)
+    if waiting == False:
+        motor.forward(step)

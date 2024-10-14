@@ -13,9 +13,9 @@ def get_middle_value():
     return gpio.digital_read(gpio.IR_M)
 
 
-def get_line_left_value():
+def get_left_line_value():
     return gpio.digital_read(gpio.IRF_L)
 
 
-def get_line_right_value():
+def get_right_line_value():
     return gpio.digital_read(gpio.IRF_R)

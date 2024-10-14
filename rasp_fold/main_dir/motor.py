@@ -4,56 +4,56 @@ import gpio_cfg as gpio
 
 
 class MotorController(object):
-    def forward_on_steps(self, n):
+    def forward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_forward()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def backward_on_steps(self, n):
+    def backward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_reverse()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_on_place_on_steps(self, n):
+    def right_on_place(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_reverse()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_on_place_on_steps(self, n):
+    def left_on_place(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_forward()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_forward_on_steps(self, n):
+    def right_forward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_backward_on_steps(self, n):
+    def right_backward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_forward_on_steps(self, n):
+    def left_forward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m3m4_forward()
         self.m1m2_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_backward_on_steps(self, n):
+    def left_backward(self, n):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m3m4_reverse()
         self.m1m2_stop()
@@ -72,12 +72,12 @@ class MotorController(object):
         gpio.digital_write(gpio.IN1, False)
         gpio.digital_write(gpio.IN2, False)
 
-    def m3m4_forward(self):
-        gpio.digital_write(gpio.IN3, True)
-        gpio.digital_write(gpio.IN4, False)
-
     def m3m4_stop(self):
         gpio.digital_write(gpio.IN3, False)
+        gpio.digital_write(gpio.IN4, False)
+
+    def m3m4_forward(self):
+        gpio.digital_write(gpio.IN3, True)
         gpio.digital_write(gpio.IN4, False)
 
     def m3m4_reverse(self):

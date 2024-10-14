@@ -9,7 +9,7 @@ def go_moves(sender: Sender, param, n):
     sender.send_command("0202" + n)
     command_code = {"forward": "000100",
                     "reverse": "000200",
-                    "left": "000300",
+                    "left_ir": "000300",
                     "right": "000400"}
     if param in command_code:
         sender.send_command(command_code[param])
