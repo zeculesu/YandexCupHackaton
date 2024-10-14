@@ -27,7 +27,6 @@ class Robot(Obj):
     def __init__(self):
         super().__init__()
 
-
 class Button(Obj):
     def __init__(self, color_name: str, lower_color: np.array, higher_color: np.array):
         super().__init__()
@@ -58,10 +57,12 @@ class Buttons:
 
 class Field:
     def __init__(self):
-        self.top_left_coords = (0, 0)
+        self.top_left_coords = (None, None)
         self.top_right_coords = (None, None)
         self.bottom_left_coords = (None, None)
         self.bottom_right_coords = (None, None)
+        self.contour = None
+        
 
 class Boarder:
     pass
@@ -69,12 +70,46 @@ class Boarder:
 def Scale(frame, scale_down=0.7):
     return cv.resize(frame, None, fx=scale_down, fy=scale_down, interpolation=cv.INTER_LINEAR)
 
-def init_field(frame_hsv, field):
+def GetWhiteAndBlack(frame_hsv):
     black = cv.inRange(frame_hsv, np.array([0, 0, 0]), np.array([200,255,100]))
-    sens = 40
-    white =  cv.inRange(frame_hsv, np.array([0,0,255-sens]), np.array([255,sens,255]))
+    sensity = 40  # ну так работает 
+    white = cv.inRange(frame_hsv, np.array([0,0,255-sensity]), np.array([255,sensity,255]))
     return  white | black
-    #return cv.drawContours(frame, contours, -1,(0,0,255),3)
+
+def GetFieldCountor(contours):
+    max_area = -1
+    max_box = None
+    
+    for cnt in contours:
+        rect = cv.minAreaRect(cnt) 
+        area = int(rect[1][0] * rect[1][1])
+        box = cv.boxPoints(rect) # поиск четырех вершин прямоугольника
+                
+        if area > max_area:
+            max_area = area
+            max_box = box
+
+    return np.array(max_box).reshape((-1,1,2)).astype(np.int32) 
+
+def InitializeField(frame, field):
+    frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    field_img = GetWhiteAndBlack(frame_hsv)
+    closing = cv.morphologyEx(field_img, cv.MORPH_CLOSE, np.ones((10,10),np.uint8))  # делает линию сплошной
+    contours = cv.findContours(closing, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+    
+    field.contour = field_contour = GetFieldCountor(contours)
+
+    min_x = int(field_contour[:, :, 0:1].min())
+    max_x = int(field_contour[:, :, 0:1].max())
+    min_y = int(field_contour[:, :, 1:2].min())
+    max_y = int(field_contour[:, :, 1:2].max())
+
+    field.top_left_coords = (min_x, min_y)
+    field.bottom_right_coords = (max_x, max_y)
+    field.top_right_coords = (max_x, min_y)
+    field.bottom_left_coords = (min_x, max_y)
+
+
 
 
 def main():
@@ -96,41 +131,30 @@ def main():
     values = [ValueObj() for _ in range(values_count - special_values_count)]
     special_values = [ValueObj(True) for _ in range(special_values_count)]
 
-    video_name = "Right_1.avi"
+    video_name = "Left_1.avi"
     capture = cv.VideoCapture(video_name)
-    c = 1
+    frame_counter = 1
+
 
     while capture.isOpened():
         ret, frame = capture.read()
         if not ret:
             print("Can't receive frame (stream end?). Exiting ...")
             break
-        frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
-        field_img = init_field(frame_hsv, field)
-        kernel = np.ones((6,6),np.uint8)
-        closing = cv.morphologyEx(field_img, cv.MORPH_CLOSE, kernel)
-
-        contours = cv.findContours(closing, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
-        for cnt in contours:
-            rect = cv.minAreaRect(cnt) 
-            box = cv.boxPoints(rect) # поиск четырех вершин прямоугольника
-            ctr = np.array(box).reshape((-1,1,2)).astype(np.int32) # хуй знает
-            # Рисую контур - прямоугольник
-            cv.drawContours(frame, (ctr,), -1, (0,255,0) , 4) # рисуем прямоугольник
-
-
-
+        if frame_counter == 1:
+            InitializeField(frame, field)
+            
+        cv.drawContours(frame, (field.contour,), -1, (0,255,0) , 4) # рисуем прямоугольник
         cv.imshow('frame', Scale(frame))
 
         if cv.waitKey(1) & 0xFF in (ord('q'), ord('й')):
             break
     
-
-    c += 1
+        frame_counter += 1
         
 
-
+ 
 main()
 
 
@@ -164,7 +188,6 @@ while False:
         rect = cv.minAreaRect(cnt) 
         box = cv.boxPoints(rect) # поиск четырех вершин прямоугольника
         ctr = np.array(box).reshape((-1,1,2)).astype(np.int32) # хуй знает
-
 
         center = (int(rect[0][0]),int(rect[0][1]))
         area = int(rect[1][0]*rect[1][1])
