@@ -8,6 +8,7 @@
           <mappings>
             <mapping deploy="/home/pi/work/python_src" local="$PROJECT_DIR$/rasp_fold" web="/" />
             <mapping local="" />
+            <mapping deploy="/home/pi/work/workspace" local="$PROJECT_DIR$/workspace_rsp" />
           </mappings>
         </serverdata>
       </paths>
