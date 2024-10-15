@@ -4,6 +4,31 @@ import cv2 as cv
 from enum import Enum
 
 
+"""
+
+Current tasks
+
+1) Придумать шаги изменения векторов в количестве итераций
+    если делать слишком часто, то дельта всегда будет очень маленькой, нужна хотя бы 1 секунда
+    придется добавить это во все обжекты
+
+2) Наложить защиту на кнопки 
+    а) Ничего не нашло - оставляем коорды, is_visible = False
+    б) Что-то нашло - как поймем что это то, что нам надо ->
+        I - Небольшая дельта 
+        II - Вне робота 
+        Тогда обновляем координаты
+
+3) Подсвечивать определенным образом кнопки, которые надо нажать и не надо нажать
+
+4) Обнаружение робота через его гусеницы - ОНИ ВСЕГДА ПАРАЛЛЕЛЬНЫ, МЕЖДУ НИМИ
+КОНСТАНТНОЕ РАССТОЯНИЕ - МОЖНО ВЫСЧИТЫВАТЬ УГОЛ
+
+Если дельта очен очень большая, тогда кнопки пропали из видимости и при этом задетектился робот
+
+
+"""
+
 def Scale(frame, scale_down=0.7):
     return cv.resize(frame, None, fx=scale_down, fy=scale_down, interpolation=cv.INTER_LINEAR)
 
@@ -16,7 +41,17 @@ class Obj:
         self.x:          int = None
         self.y:          int = None
         self.is_dynamic: bool = False
-        self.vector:     list[int] = [None, None]
+        self.vector:     tuple[int] = (0, 0)
+        self.contour:    np.array = None
+        self.vector_updating_frequency = 1
+        self.max_delta_for_static = 10
+
+    def SetVector(self, x, y):
+        self.vector = (x, y)
+        if (x**2 + y**2)*0.5 > self.max_delta_for_static:
+            self.is_dynamic = True
+        else:
+            self.is_dynamic = False
 
 class Owner(Enum):
     ENEMY = -1
@@ -192,10 +227,10 @@ def DetectPairButton(frame_hsv, buttons, color_name_1, color_name_2, frame):
 
 def main():
     button_colors_map = {
-        "green": (np.array([50,100,140]), np.array([83,170,240])),  # fix
+        "green": (np.array([50,100,140]), np.array([83,170,240])),  
         "blue": (np.array([90,158,124]), np.array([138,255,255])),
         "red": (np.array([157, 92, 175]), np.array([185, 241, 252])),
-        "orange": (np.array([0, 100, 207]), np.array([40, 254, 247])),  # fix
+        "orange": (np.array([0, 100, 207]), np.array([40, 254, 247])),  
     }
 
     buttons = Buttons(button_colors_map)
@@ -210,7 +245,7 @@ def main():
     values = [ValueObj() for _ in range(values_count - special_values_count)]
     special_values = [ValueObj(True) for _ in range(special_values_count)]
 
-    video_name = "Left_1.avi"
+    video_name = "Right_1.avi"
     capture = cv.VideoCapture(video_name)
     frame_counter = 1
 
