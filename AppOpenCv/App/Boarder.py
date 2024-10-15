@@ -1,0 +1,2 @@
+class Boarder:
+    pass

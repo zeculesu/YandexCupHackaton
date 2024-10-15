@@ -119,6 +119,7 @@ class VideoCapture:
         self.name = name
         self.IndexCamera = index 
 
+    """
     def start_video_object_detection(self, Objects_for_look) -> None:
         """
         Real-time video capture and analysis
@@ -151,7 +152,7 @@ class VideoCapture:
 
             except KeyboardInterrupt:
                 pass 
-
+    """
 
 if __name__ == '__main__':
     App().run()
