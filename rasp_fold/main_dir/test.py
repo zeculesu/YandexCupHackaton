@@ -14,14 +14,14 @@ while True:
     if left_ir and right_ir and middle_ir:
         waiting = False
 
-    if left_line_ir == 0:
-        motor.left_forward(step)
-    if right_line_ir == 0:
-        motor.right_forward(step)
-    if not (left_line_ir or right_line_ir):
-        motor.backward(8)
-        motor.right_backward(8)
-        
+    # if left_line_ir == 0:
+    #     motor.left_forward(step)
+    # if right_line_ir == 0:
+    #     motor.right_forward(step)
+    # if not (left_line_ir or right_line_ir):
+    #     motor.backward(8)
+    #     motor.right_backward(8)
+
     if left_ir == 0:
         motor.stop()
         if middle_ir == 1:

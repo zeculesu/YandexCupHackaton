@@ -15,13 +15,13 @@ class ServoController(object):
     def __init__(self):
         self.i2c = I2c()
 
-    def set_default_position(self):
+    def set_default_position(self) -> None:
         pass
 
-    def set_position(self):
+    def set_position(self) -> None:
         pass
 
-    def set(self, servo_port, angle):
+    def set(self, servo_port: int, angle: int | float) -> None:
         angle = angle_limit(angle)
         buf = [cfg.HEADER, 0x01, servo_port, angle, cfg.HEADER]
         try:

@@ -4,7 +4,7 @@ from tkinter import YView
 BEET_SPEED = 50
 CLAPPER = 4
 
-# Заголовок и концевик
+# Header and end caption
 HEADER = 0xff
 
 # Servo vars

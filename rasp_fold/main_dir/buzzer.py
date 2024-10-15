@@ -1,5 +1,6 @@
 import time
 from builtins import range, object, len, int
+from typing import List
 
 import gpio_cfg as gpio
 import config as cfg
@@ -90,7 +91,7 @@ class Buzzer(object):
                                     0.5, 0.5, 0.5, 0.5, 1, 1, 1, 2]
         pass
 
-    def tone(self, tune, beet):
+    def tone(self, tune: float | int, beet: float | int) -> None:
         tim = 500000 / tune
         duration_count = beet * 60 * tune / cfg.BEET_SPEED / cfg.CLAPPER
         for i in range(int(duration_count)):
@@ -102,7 +103,7 @@ class Buzzer(object):
             else:
                 time.sleep(0.001)
 
-    def play_music(self, major, melody, beet):
+    def play_music(self, major, melody: List[float | int], beet: List[float | int]) -> None:
         length = len(melody)
         for i in range(length):
             tone_act = self.tone_all[major][melody[i]]
