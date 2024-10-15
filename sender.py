@@ -12,7 +12,6 @@ class Sender:
     def send_command(self, command: str):
         try:
             cur_command = bytes.fromhex(Sender.header + command + Sender.header)
-            # print(cur_command)
             # Создаем сокет
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(5)
