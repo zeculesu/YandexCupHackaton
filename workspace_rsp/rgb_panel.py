@@ -51,12 +51,12 @@ class RGBPanel:
 
     def got_vol(self):
         time.sleep(0.005)
-        vol_H = i2c.read_data(i2c.mcu_address, 0x05)
-        if vol_H == None:
-            vol_H = 0
+        vol_h = i2c.read_data(i2c.mcu_address, 0x05)
+        if vol_h is None:
+            vol_h = 0
         time.sleep(0.005)
-        vol_L = i2c.read_data(i2c.mcu_address, 0x06)
-        if vol_L == None:
-            vol_L = 0
-        vol = (vol_H << 8) + vol_L
+        vol_l = i2c.read_data(i2c.mcu_address, 0x06)
+        if vol_l is None:
+            vol_l = 0
+        vol = (vol_h << 8) + vol_l
         return vol

@@ -1,5 +1,5 @@
-from i2c import I2c
 import config as cfg
+from i2c import I2c
 
 
 def angle_limit(angle):
@@ -21,8 +21,7 @@ class ServoController(object):
     def set_position(self) -> None:
         pass
 
-    def set(self, servo_port: int, angle
-            ) -> None:
+    def set(self, servo_port: int, angle) -> None:
         angle = angle_limit(angle)
         buf = [cfg.HEADER, 0x01, servo_port, angle, cfg.HEADER]
         try:
