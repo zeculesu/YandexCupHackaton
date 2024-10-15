@@ -91,13 +91,6 @@ class Buzzer(object):
         pass
 
     def tone(self, tune, beet):
-        '''
-        播放音符及对应节拍
-        :param pin:引脚
-        :param tune: 曲调
-        :param beet:节拍
-        :return:
-        '''
         tim = 500000 / tune
         duration_count = beet * 60 * tune / cfg.BEET_SPEED / cfg.CLAPPER
         for i in range(int(duration_count)):
@@ -110,11 +103,6 @@ class Buzzer(object):
                 time.sleep(0.001)
 
     def play_music(self, major, melody, beet):
-        '''
-        :param melody:曲谱
-        :param beet:节拍
-        :return:
-        '''
         length = len(melody)
         for i in range(length):
             tone_act = self.tone_all[major][melody[i]]
