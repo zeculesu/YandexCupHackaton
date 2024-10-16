@@ -21,8 +21,8 @@ class Jesys:
                 print(f"Подключено: {addr}")
                 self.handle_client(client_socket)
         except Exception as e:
+            server_socket.close()
             print(e)
-            self.start_server()
 
     def handle_client(self, client_socket):
         while True:
@@ -30,10 +30,12 @@ class Jesys:
             if not message:
                 break
             print(f"Получено сообщение: {message}")
+            self.read_request(message)
             client_socket.send("Сообщение получено".encode('utf-8'))
         client_socket.close()
 
     def read_request(self, command):
+        command = int(command)
         if 0 <= command <= 8:
             if command == 0:
                 self.motor.stop()
