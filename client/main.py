@@ -1,4 +1,3 @@
-import socket
 import time
 
 from client.sender import Sender
@@ -10,8 +9,6 @@ def start_client():
         print("Подключение к серверу...")
         sender.create_socket()
         sender.connect()
-        # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # client_socket.connect((host, port))
     except ConnectionError:
         print("Подключение оборвалось...")
         time.sleep(5)
@@ -22,6 +19,7 @@ def start_client():
         message = input("Введите сообщение (или 'exit' для выхода): ")
         if message.lower() == 'exit':
             break
+
         sender.send(message)
         response = sender.socket.recv(1024).decode('utf-8')
         if not response:

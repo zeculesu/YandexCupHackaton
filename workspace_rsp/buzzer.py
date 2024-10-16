@@ -89,6 +89,9 @@ class Buzzer(object):
         self.beet_Happy_birthday = [0.5, 0.5,
                                     1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 1, 2,
                                     0.5, 0.5, 0.5, 0.5, 1, 1, 1, 2]
+
+        self.melody_russian_gymn = [self.H3, self.H6, self.H3, self.H4, self.H5, 7, 7]
+        self.beet_russian_gymn = [0.5, 1, 0.75, 0.25, 1, 0.5, 0.5]
         pass
 
     def tone(self, tune, beet) -> None:

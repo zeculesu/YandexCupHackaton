@@ -2,6 +2,7 @@ import socket
 
 port = 4242
 
+
 class Jesys:
     def __init__(self, motor, manipulator, camera):
         self.motor = motor
@@ -55,8 +56,3 @@ class Jesys:
                 self.motor.left_forward()
             elif command == 8:
                 self.motor.left_backward()
-
-#
-# if __name__ == "__main__":
-#     host, port = "192.168.2.156", 4242
-#     start_server()
