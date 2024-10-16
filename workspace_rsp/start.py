@@ -1,5 +1,3 @@
-import signal
-
 from buzzer import Buzzer
 from camera import CameraController
 from manipulator import ManipulatorController

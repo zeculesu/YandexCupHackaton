@@ -9,6 +9,12 @@ def angle_limit(angle):
         angle = cfg.ANGLE_MIN
     return angle
 
+def claw_limit(angle):
+    if angle > cfg.CLOSED_CLAW:
+        angle = cfg.CLOSED_CLAW
+    elif angle < cfg.OPENED_CLAW:
+        angle = cfg.OPENED_CLAW
+    return angle
 
 class ServoController(object):
 

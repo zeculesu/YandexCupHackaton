@@ -1,5 +1,6 @@
 from servo import ServoController, angle_limit
 import config as cfg
+from servo import claw_limit
 
 
 class ManipulatorController(ServoController):
@@ -52,7 +53,7 @@ class ManipulatorController(ServoController):
         self.set_position()
 
     def move_claw(self, angle: int) -> None:
-        self.cur_main_angle = angle_limit(angle + self.cur_claw_angle)
+        self.cur_claw_angle = claw_limit(angle + self.cur_claw_angle)
         self.set_position()
 
     def set_position(self) -> None:

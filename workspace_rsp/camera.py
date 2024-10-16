@@ -19,6 +19,7 @@ class CameraController(ServoController):
         self.set(cfg.CAM_CUBIT_PORT, self.cur_cubit_angle)
         self.set(cfg.CAM_ROTATE_PORT, self.cur_rotate_angle)
 
+    #TODO limit angle fix
     def move_cubit(self, angle: int) -> None:
         self.cur_cubit_angle = angle_limit(angle + self.cur_cubit_angle)
         self.set_position()
