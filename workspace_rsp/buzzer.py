@@ -1,6 +1,5 @@
 import time
 from builtins import range, object, len, int
-from typing import List
 
 import gpio_cfg as gpio
 import config as cfg
@@ -90,8 +89,22 @@ class Buzzer(object):
                                     1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 1, 2,
                                     0.5, 0.5, 0.5, 0.5, 1, 1, 1, 2]
 
-        self.melody_russian_gymn = [self.H3, self.H6, self.H3, self.H4, self.H5, 7, 7]
-        self.beet_russian_gymn = [0.5, 1, 0.75, 0.25, 1, 0.5, 0.5]
+        self.melody_russian_gymn = [5, self.H1, 5, 6, 7, 3, 3,
+                                    6, 5, 4, 5, 1, 1,
+                                    2, 2, 3, 4, 4, 5,
+                                    6, 7, self.H1, self.H2, 5, 5,
+                                    self.H3, self.H2, self.H1, self.H2, 7, 5,
+                                    self.H1, 7, 6, 7, 3, 3,
+                                    6, 5, 4, 5, 1, 1,
+                                    self.H1, 7, 6, 5]
+        self.beet_russian_gymn = [0.5, 1, 0.75, 0.25, 1, 0.5, 0.5,
+                                  1, 0.75, 0.25, 1, 0.75, 0.25,
+                                  1, 0.75, 0.25, 1, 0.75, 0.25,
+                                  1, 0.75, 0.25, 1, 0.5, 0.5,
+                                  1, 0.75, 0.25, 1, 0.5, 0.5,
+                                  1, 0.75, 0.25, 1, 0.5, 0.5,
+                                  1, 0.75, 0.25, 1, 0.75, 0.25,
+                                  1, 0.75, 0.25, 1]
         pass
 
     def tone(self, tune, beet) -> None:
@@ -111,3 +124,4 @@ class Buzzer(object):
         for i in range(length):
             tone_act = self.tone_all[major][melody[i]]
             self.tone(tone_act, beet[i])
+            time.sleep(0.02)

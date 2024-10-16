@@ -12,6 +12,9 @@ rgb = RGBPanel()
 beep = Buzzer()
 server = Jesys(motor, camera, manipulator)
 
+# TODO раскидать по папочкам
+# TODO сделать освобождение порта
+# TODO вынести порт и адрес в отдельный конфиг
 host, port = "192.168.2.156", 4242
 print("Start")
 server.start_server()

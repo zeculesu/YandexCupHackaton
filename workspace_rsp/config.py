@@ -1,7 +1,7 @@
 # Buzzer
 from tkinter import YView
 
-BEET_SPEED = 50
+BEET_SPEED = 35
 CLAPPER = 4
 
 # Header and end caption
@@ -13,15 +13,15 @@ ANGLE_MIN = 0
 
 CAM_CUBIT_PORT = 8
 CAM_ROTATE_PORT = 7
-CAM_CUBIT_DEFAULT = 70
-CAM_ROTATE_DEFAULT = 50
+CAM_CUBIT_DEFAULT = 90
+CAM_ROTATE_DEFAULT = 30
 
 CLAW_PORT = 4
 OPENED_CLAW = 40
 CLOSED_CLAW = 88
 
 MAIN_PORT = 1
-MAIN_UP = 160
+MAIN_UP = 150
 MAIN_DOWN = 65
 cur_main_angle = 0
 
@@ -33,11 +33,9 @@ WRIST_PORT = 3
 WRIST_STRAIGHT = 90
 WRIST_ROTATED = 175
 
-
 # Motor vars
 STEP_TIME = 0.1
 DEFAULT_SPEED = 50
-
 
 # RGB Panels
 RGB_POWER = 1
@@ -56,10 +54,10 @@ WHITE = 8
 # OLED
 LOGO = "4+1 TM"  # OLED显示屏显示的信息是英文
 OLED_DISP_MOD = ["正常模式", "红外跟随", "红外巡线", "红外防掉落", "超声波避障",
-				 "超声波距离显示", "超声波走迷宫", "摄像头调试",
-				 "摄像头巡线", "人脸检测跟随", "颜色检测跟随", "二维码识别",
-				 ]  # 模式显示的是中文
+                 "超声波距离显示", "超声波走迷宫", "摄像头调试",
+                 "摄像头巡线", "人脸检测跟随", "颜色检测跟随", "二维码识别",
+                 ]  # 模式显示的是中文
 OLED_DISP_MOD_SIZE = 16
-POWER = 3  				# 电量值0-3
-DISTANCE = 0  			# 超声波测距值
+POWER = 3  # 电量值0-3
+DISTANCE = 0  # 超声波测距值
 CRUISING_FLAG = 0

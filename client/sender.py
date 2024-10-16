@@ -1,27 +1,14 @@
 import socket
 
+# пишем sender = Sender(self.host, self.port) потом
+# sender.start_client(), проверяем если там не False, то всё хорошо, мы подключились
+# далее чтобы отправить запрос пишем sender.send( MOTOR.STOP (например) ) если произошла ошибка при отправке сообщения,
+# то вернет False
+# в САМОМ конце работы надо закрыть сокет с помощью sender.socket_close()
+
+host, port = "192.168.2.156", 4242
 
 class Sender:
-    command_list_motor = {
-        "stop": 0,
-        "forward": 1,
-        "backward": 2,
-        "right_on_place": 3,
-        "left_on_place": 4,
-        "right_forward": 5,
-        "right_backward": 6,
-        "left_forward": 7,
-        "left_backward": 8,
-    }
-
-    command_list_manipulator = {
-
-    }
-
-    command_list_camera = {
-
-    }
-
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -39,15 +26,20 @@ class Sender:
         self.socket.close()
         self.socket = None
 
-    # Sender.send_motor("stop")
-    def send_motor(self, command):
-        self.send(Sender.command_list_motor[command])
-
-    def send_manipulator(self, command):
-        self.send(Sender.command_list_manipulator[command])
-
-    def send_camera(self, command):
-        self.send(Sender.command_list_camera[command])
-
     def send(self, message):
         self.socket.send(message.encode('utf-8'))
+        response = self.socket.recv(1024).decode('utf-8')
+        if not response:
+            self.socket_close()
+            return False
+        return response
+
+    def start_client(self):
+        try:
+            print("Подключение к серверу...")
+            self.create_socket()
+            self.connect()
+        except ConnectionError:
+            print("Подключение оборвалось...")
+            return False
+        return True

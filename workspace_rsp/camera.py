@@ -13,6 +13,7 @@ class CameraController(ServoController):
     def set_default_position(self) -> None:
         self.cur_cubit_angle = cfg.CAM_CUBIT_DEFAULT
         self.cur_rotate_angle = cfg.CAM_ROTATE_DEFAULT
+        self.set_position()
 
     def set_position(self) -> None:
         self.set(cfg.CAM_CUBIT_PORT, self.cur_cubit_angle)

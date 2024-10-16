@@ -18,12 +18,9 @@ class Jesys:
             print("Сервер запущен, ожидается подключение...")
 
             while True:
-                try:
-                    client_socket, addr = server_socket.accept()
-                    print(f"Подключено: {addr}")
-                    self.handle_client(client_socket)
-                except KeyboardInterrupt:
-                    server_socket.close()
+                client_socket, addr = server_socket.accept()
+                print(f"Подключено: {addr}")
+                self.handle_client(client_socket)
         except Exception as e:
             server_socket.close()
             print(e)
