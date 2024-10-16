@@ -1,4 +1,6 @@
+import signal
 import socket
+import sys
 
 port = 4242
 
@@ -9,24 +11,27 @@ class Jesys:
         self.manipulator = manipulator
         self.camera = camera
 
+        self.server_socket = None
+        signal.signal(signal.SIGINT, self.signal_handler)
+
     def start_server(self):
         try:
-            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server_socket.bind(('0.0.0.0', port))
-            server_socket.listen(5)
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server_socket.bind(('0.0.0.0', port))
+            self.server_socket.listen(5)
 
             print("Сервер запущен, ожидается подключение...")
 
             while True:
-                try:
-                    client_socket, addr = server_socket.accept()
-                    print(f"Подключено: {addr}")
-                    self.handle_client(client_socket)
-                except KeyboardInterrupt:
-                    server_socket.close()
+                client_socket, addr = self.server_socket.accept()
+                print(f"Подключено: {addr}")
+                self.handle_client(client_socket)
         except Exception as e:
-            server_socket.close()
+            self.server_socket.close()
             print(e)
+        finally:
+            if self.server_socket:
+                self.server_socket.close()
 
     def handle_client(self, client_socket):
         while True:
@@ -38,7 +43,14 @@ class Jesys:
             client_socket.send("Сообщение получено".encode('utf-8'))
         client_socket.close()
 
+    def signal_handler(self, sig, frame):
+        print("Завершение сервера...")
+        if self.server_socket:
+            self.server_socket.close()
+        sys.exit(0)
+
     def read_request(self, command):
+        # TODO проверку добавить
         command = int(command)
         if 0 <= command <= 8:
             if command == 0:

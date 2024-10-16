@@ -14,7 +14,19 @@ class Motor(Enum):
 
 
 class Manipulator(Enum):
-    pass
+    DEFAULT_POSITION = 9
+    CLOSE_CLAW = 10
+    OPEN_CLAW = 11
+    SET_THROW_POSITION = 12
+    SET_DOWN_POSITION = 13
+    # TODO уточнить в клиенте и сервере что там параметры должны приниматься
+    MOVE_MAIN = 14
+    MOVE_CUBIT = 15
+    MOVE_WRIST = 16
+    MOVE_CLAW = 17
+
 
 class Camera(Enum):
-    pass
+    DEFAULT_POSITION = 18
+    MOVE_CUBIT = 19
+    MOVE_ROTATE = 20
