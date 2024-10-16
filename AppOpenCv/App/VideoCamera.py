@@ -1,5 +1,3 @@
-import Buttons
-
 import cv2 as cv
 import numpy as np
 
@@ -8,7 +6,6 @@ class VideoCamera:
     def __init__(self, index: str):
         self.index = index
         self.frame_counter = 1
-
         self.VideoCap = cv.VideoCapture(self.index)
 
     def IsOpen(self) -> bool:
