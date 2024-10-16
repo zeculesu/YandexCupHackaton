@@ -52,3 +52,14 @@ LIGHT_BLUE = 5
 BLUE = 6
 PURPLE = 7
 WHITE = 8
+
+# OLED
+LOGO = "4+1 TM"  # OLED显示屏显示的信息是英文
+OLED_DISP_MOD = ["正常模式", "红外跟随", "红外巡线", "红外防掉落", "超声波避障",
+				 "超声波距离显示", "超声波走迷宫", "摄像头调试",
+				 "摄像头巡线", "人脸检测跟随", "颜色检测跟随", "二维码识别",
+				 ]  # 模式显示的是中文
+OLED_DISP_MOD_SIZE = 16
+POWER = 3  				# 电量值0-3
+DISTANCE = 0  			# 超声波测距值
+CRUISING_FLAG = 0

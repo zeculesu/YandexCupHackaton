@@ -4,56 +4,56 @@ import gpio_cfg as gpio
 
 
 class MotorController(object):
-    def forward(self, n):
+    def forward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_forward()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def backward(self, n):
+    def backward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_reverse()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_on_place(self, n):
+    def right_on_place(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_reverse()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_on_place(self, n):
+    def left_on_place(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_forward()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_forward(self, n):
+    def right_forward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def right_backward(self, n):
+    def right_backward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_forward(self, n):
+    def left_forward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m3m4_forward()
         self.m1m2_stop()
         sleep(cfg.STEP_TIME * n)
         self.stop()
 
-    def left_backward(self, n):
+    def left_backward(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m3m4_reverse()
         self.m1m2_stop()

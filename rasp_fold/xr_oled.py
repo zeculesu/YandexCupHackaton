@@ -24,12 +24,6 @@ from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
 
-from xr_ultrasonic import Ultrasonic
-
-ultrasonic = Ultrasonic()
-
-import xr_config as cfg
-
 
 class Oled():
 	def __init__(self):
