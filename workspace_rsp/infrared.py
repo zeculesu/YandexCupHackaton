@@ -1,5 +1,6 @@
 import gpio_cfg as gpio
 
+
 # 1 означает препятствие, 0 если свободно
 
 def get_left_value() -> bool:

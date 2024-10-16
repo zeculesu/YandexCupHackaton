@@ -1,5 +1,5 @@
-from i2c import I2c
 import config as cfg
+from i2c import I2c
 
 
 def angle_limit(angle):
