@@ -1,5 +1,3 @@
-from typing import Literal
-
 import gpio_cfg as gpio
 
 # 1 означает препятствие, 0 если свободно

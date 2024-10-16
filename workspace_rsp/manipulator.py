@@ -30,7 +30,7 @@ class ManipulatorController(ServoController):
     def set_throw_position(self) -> None:
         self.cur_main_angle = cfg.MAIN_UP
         self.cur_cubit_angle = cfg.CUBIT_THROW
-        self.cur_wrist_angle = cfg.WRIST_ROTATED
+        self.cur_wrist_angle = cfg.WRIST_STRAIGHT
         self.set_position()
 
     def set_down_position(self) -> None:

@@ -21,7 +21,7 @@ class ServoController(object):
     def set_position(self) -> None:
         pass
 
-    def set(self, servo_port: int, angle: int | float) -> None:
+    def set(self, servo_port: int, angle) -> None:
         angle = angle_limit(angle)
         buf = [cfg.HEADER, 0x01, servo_port, angle, cfg.HEADER]
         try:
