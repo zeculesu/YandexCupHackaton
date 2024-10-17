@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from client.sender import Sender
 
 
 def find_red_cube(frame):
@@ -32,6 +33,16 @@ def find_red_cube(frame):
 
     return center
 
+
+host, port = "192.168.2.156", 4242
+sender = Sender(host, port)
+while True:
+    try:
+        is_connect = sender.start_client()
+        if is_connect:
+            break
+    except:
+        continue
 
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
