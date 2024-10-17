@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import requests
 
-from AppOpenCv.App.sender import Sender
+# from AppOpenCv.App.sender import Sender
 
 url = "http://192.168.2.156:8080/?action=stream"
 def find_red_cube(frame):
@@ -55,26 +55,26 @@ if stream.status_code == 200:
 
                 x = center[0]
                 y = center[1]
-                if y <= 325:
-                    # left
-                elif y > 335:
-                    # right
-                elif x > 305:
-                    # forward
-                elif x < 300:
-                    # backward
-                else:
-                    # forward 10
-                    # close claw
-                    # default_position
+                # if y <= 325:
+                #     # left
+                # elif y > 335:
+                #     # right
+                # elif x > 305:
+                #     # forward
+                # elif x < 300:
+                #     # backward
+                # else:
+                #     # forward 10
+                #     # close claw
+                #     # default_position
 
 
 
-            sender = Sender("192.168.2.156", 4141)
-            if not sender.try_connection():
-                break
-            if not sender.send_command():
-                break
+
+            # if not sender.try_connection():
+            #     break
+            # if not sender.send_command():
+            #     break
 
             cv2.imshow('img', img)
             if cv2.waitKey(1) & 0xFF == ord('q'):
