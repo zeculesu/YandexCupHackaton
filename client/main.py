@@ -1,9 +1,9 @@
 import time
 
 from client.sender import Sender
+import workspace_rsp.config as cfg
 
-
-host, port = "192.168.2.156", 4242
+host, port = "192.168.2.156", cfg.PORT
 
 sender = Sender(host, port)
 while True:

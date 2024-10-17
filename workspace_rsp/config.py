@@ -1,3 +1,6 @@
+#HOST PORT
+PORT = 4141
+
 # Buzzer
 from tkinter import YView
 
