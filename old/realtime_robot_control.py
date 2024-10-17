@@ -1,4 +1,4 @@
-from old.sender import Sender
+from old.sender_example import Sender
 
 host = "192.168.2.156"
 port = 2001

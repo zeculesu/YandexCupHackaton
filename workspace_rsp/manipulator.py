@@ -25,7 +25,7 @@ class ManipulatorController(ServoController):
         self.set_position()
 
     def grab_cube(self):
-        self.cur_claw_angle = 70
+        self.cur_claw_angle = cfg.CUBE_GRAB_ANGLE
         self.set_position()
 
     def open_claw(self) -> None:
