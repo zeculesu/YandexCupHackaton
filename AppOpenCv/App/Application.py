@@ -1,6 +1,8 @@
 from asyncio import sleep
 
-from AppOpenCv.App.command_enum import Manipulator
+from sympy.physics.units import stefan_boltzmann_constant
+
+from AppOpenCv.App.command_enum import Manipulator, Motor
 from Log_manager import Logs
 import result_type as ResType
 from sender import Sender
@@ -25,26 +27,17 @@ class App:
                 break
 
             sender = Sender(host, port)
-            if not sender.start_client():
-                sender.try_connection()
+            if not sender.try_connection():
+                break
 
-            if not sender.check_connection():
-                self.logger.error("Connection Error")
 
             # SENDER COMMAND
             ...
             angle = ...
+            #message = f"{Motor.STOP}"
             message = f"{Manipulator.MOVE_CLAW} {angle}"
-            if sender.check_connection():
-                resp = sender.send(message)
-                if not resp:
-                    self.logger.warning("no response from server")
-                    sender.try_connection()
-                else:
-                    self.logger.info(f"answer from server: {resp}")
-            else:
-                self.logger.warning("no response from server")
-                sender.try_connection()
+            if not sender.send_command(message):
+                break
 
         return ResType.result_type(ResType.Ok(200))
 
