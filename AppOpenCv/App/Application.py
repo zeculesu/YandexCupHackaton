@@ -3,6 +3,7 @@ from asyncio import sleep
 from sympy.physics.units import stefan_boltzmann_constant
 
 from AppOpenCv.App.command_enum import Manipulator, Motor
+from AppOpenCv.App.config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
 import result_type as ResType
 from sender import Sender
@@ -30,12 +31,11 @@ class App:
             if not sender.try_connection():
                 break
 
-
             # SENDER COMMAND
             ...
             angle = ...
-            #message = f"{Motor.STOP}"
-            message = f"{Manipulator.MOVE_CLAW} {angle}"
+            # message = MOTOR_STOP
+            message = f"{MANIPULATOR_MOVE_CLAW} {angle}"
             if not sender.send_command(message):
                 break
 

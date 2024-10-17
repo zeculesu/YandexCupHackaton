@@ -1,6 +1,7 @@
 import signal
 import socket
 import sys
+import time
 
 
 class Server:
@@ -75,40 +76,46 @@ class Server:
                 elif command == 8:
                     self.motor.left_backward()
 
-            elif 9 <= command <= 17:
-                if command == 9:
+            elif 10 <= command <= 29:
+                if command == 10:
                     self.manipulator.set_default_position()
 
-                elif command == 10:
+                elif command == 11:
                     self.manipulator.close_claw()
 
-                elif command == 11:
+                elif command == 12:
                     self.manipulator.open_claw()
 
-                elif command == 12:
+                elif command == 13:
                     self.manipulator.set_throw_position()
 
-                elif command == 13:
-                    self.manipulator.set_down_position()
-
                 elif command == 14:
+                    self.manipulator.set_down_position()
+                #todo вырывает провод
+                elif command == 15:
                     self.manipulator.move_main(val)
 
-                elif command == 15:
+                elif command == 16:
                     self.manipulator.move_cubit(val)
 
-                elif command == 16:
+                elif command == 17:
                     self.manipulator.move_wrist(val)
 
-                elif command == 17:
+                elif command == 18:
                     self.manipulator.move_claw(val)
-
-            elif 18 <= command <= 20:
-                if command == 18:
-                    self.camera.set_default_position()
                 elif command == 19:
+                    self.motor.forward(4)
+                    self.manipulator.grab_cube()
+                    time.sleep(2)
+                    self.manipulator.set_default_position()
+
+
+            elif 30 <= command <= 40:
+                if command == 30:
+                    self.camera.set_default_position()
+                elif command == 31:
                     self.camera.move_cubit(val)
-                elif command == 20:
+                elif command == 32:
                     self.camera.move_rotate(val)
         except Exception as e:
             return
