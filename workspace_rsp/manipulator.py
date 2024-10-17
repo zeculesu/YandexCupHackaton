@@ -1,7 +1,7 @@
 from servo import ServoController, angle_limit
 import config as cfg
 from servo import claw_limit
-from workspace_rsp.servo import main_manipulator_angle_limit
+from servo import main_manipulator_angle_limit
 
 
 class ManipulatorController(ServoController):
