@@ -12,7 +12,7 @@ class App:
         self.logger = LogClass.getLogger()
         self.logger.info("Create Logs")
 
-        self.HighCamera = HighCamera("C:\\Aram\\UrFU\\FromVideo\\Right_1.avi")
+        self.HighCamera = HighCamera("../../../Right_1.avi")
 
     def run(self):
         while True:
