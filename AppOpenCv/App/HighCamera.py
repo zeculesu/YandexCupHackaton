@@ -35,11 +35,14 @@ class HighCamera:
         self.field = Field()
         self.red_base = Base(Owner.ENEMY)
         self.green_base = Base(Owner.WE)
+        self.walls = None
 
         #  setting the video
         video_name = path
         self.capture = cv.VideoCapture(video_name)
         self.frame_counter = 1
+
+
 
     def Scale(self, frame, scale_down=0.7):
         return cv.resize(frame, None, fx=scale_down, fy=scale_down, interpolation=cv.INTER_LINEAR)
@@ -52,6 +55,8 @@ class HighCamera:
         box = cv.boxPoints(rect)
         new_contour = np.array(box).reshape((-1,1,2)).astype(np.int32)
         return Rectangle(new_contour)
+
+
 
     """ Initialize field funcs"""
     def GetMaxAreaContour(self, contours):
@@ -146,10 +151,18 @@ class HighCamera:
             raise Exception("InitializeBase : No contours were found in area-range of", min_area, max_area)
 
         self.green_base.contour = result_contour
-
+        rect = self.GetRectangleFromContour(result_contour)
+        self.green_base.top_left_coords = rect.A
+        self.green_base.top_right_coords = rect.B
+        self.green_base.bottom_right_coords = rect.C
+        self.green_base.bottom_left_coords = rect.D
 
         contours = self.DetectContours(frame_hsv, ((lower_red_1, higher_red_1), (lower_red_2, higher_red_2)),
                                         min_area, max_area, kernel)  
+
+        if not contours:
+            raise Exception("InitializeBase : No contours by DetectContours")
+
 
         contours = self.SelectContoursByRatio(contours, ratio, eps=eps)
         if not contours:
@@ -161,6 +174,326 @@ class HighCamera:
             raise Exception("InitializeBase : No contours were found in area-range of", min_area, max_area)
 
         self.red_base.contour = result_contour
+        rect = self.GetRectangleFromContour(result_contour)
+        self.red_base.top_left_coords = rect.A
+        self.red_base.top_right_coords = rect.B
+        self.red_base.bottom_right_coords = rect.C
+        self.red_base.bottom_left_coords = rect.D
+
+    def Lol(self, path):
+        frame = cv.imread(path)
+        frame = self.FixFishEye(frame)
+        frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+
+        self.InitializeField(frame_hsv)
+        self.InitializeBase(frame_hsv)
+        self.InitializeWalls(frame_hsv, frame)
+        self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
+        self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
+
+
+    def InitializeNormalWalls(self, frame_hsv, frame):
+        #cv.imshow('frame', self.Scale(frame))
+        #cv.waitKey(0)
+
+        top_left = self.field.top_left_coords
+        top_right = self.field.top_right_coords
+        bottom_left = self.field.bottom_left_coords
+        bottom_right = self.field.bottom_right_coords
+
+        min_x = min(top_left[0], bottom_left[0])
+        max_x = max(top_right[0],bottom_right[0])
+        min_y = min(top_right[1], top_left[1])
+        max_y = max(bottom_right[1], bottom_left[1])
+
+        step_x = (max_x - min_x) // 20
+        step_y = (max_y - min_y) // 20
+
+        rect_1_coords = (min_x + step_x*4, min_y + step_y * 2)
+        rect_2_coords = (rect_1_coords[0] + step_x * 9, rect_1_coords[1])
+        rect_3_coords = (rect_2_coords[0], rect_1_coords[1] + step_y * 13)
+        rect_4_coords = (rect_1_coords[0], rect_3_coords[1])
+
+        x_len = step_x * 3
+        y_len = step_y * 4
+
+        class Rect:
+            def __init__(self, coords, x_len, y_len):
+                self.A = (x, y) = coords
+                self.B = (x + x_len, y)
+                self.C = (x + x_len, y + y_len)
+                self.D = (x, y + y_len)
+                self.x_len = x_len
+                self.y_len = y_len
+
+            def HasPoint(self, coords):
+                x, y = coords
+                return (self.A[0] <= x <= self.A[0] + self.x_len) and (self.A[1] <= y <= self.A[1] + self.y_len)
+
+        rects = []
+        def draw_rect(rect_coords):
+            x, y = rect_coords
+            cv.line(frame, (x, y), (x, y + y_len), (255, 104, 150), 3)
+            cv.line(frame, (x, y), (x + x_len, y), (255, 104, 150), 3)
+            cv.line(frame, (x + x_len, y), (x + x_len, y + y_len), (255, 104, 150), 3)
+            cv.line(frame, (x, y + y_len), (x + x_len, y + y_len), (255, 104, 150), 3)
+
+        for rect_coords in (rect_1_coords, rect_2_coords, rect_3_coords, rect_4_coords):
+            draw_rect(rect_coords)
+
+            rects.append(Rect(rect_coords, x_len, y_len))
+
+
+        # 1 2
+        # 4 3
+
+        frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+
+        frame_hsv = cv.inRange(frame_hsv, np.array([0, 0, 0]), np.array([255, 255, 70]))
+
+        kernel = 5
+
+        closing = cv.morphologyEx(frame_hsv, cv.MORPH_CLOSE, np.ones((kernel,kernel), np.uint8)) 
+        dilation = cv.dilate(closing, np.ones((kernel,kernel), np.uint8), iterations=2)
+        closing = cv.morphologyEx(dilation, cv.MORPH_CLOSE, np.ones((kernel,kernel), np.uint8)) 
+
+        contours = cv.findContours(closing, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[0]
+
+        contour_color = (150, 104, 150)
+
+        selected_contours = []
+
+        class Edge:
+            def __init__(self, x, y):
+                self.x = x
+                self.y = y
+                self.xy = (self.x, self.y)
+                
+
+        top_left_edge = None
+        bottom_right_edge = None
+
+        connections = []
+
+        for cnt in contours:
+            x, y, w, h = cv.boundingRect(cnt)
+            # 30k - 70k
+            # Не больше 75 тысяч, Больше 40 тысяч  (48000)
+            # 30k / 4 = 8k
+            if cv.contourArea(cnt) < 8000:
+                continue
+
+            dots = []
+
+            if rects[0].HasPoint((x, y)):
+                cv.drawContours(frame, (cnt,), -1, contour_color, 4)
+                top_left_edge = Edge(x + 15, y + 15)
+                cv.circle(frame, (x + 15, y + 15), 7, (104, 29, 59), -1)
+                dots.append(1)
+
+            if rects[1].HasPoint((x + w, y)):
+                cv.drawContours(frame, (cnt,), -1, contour_color, 4)
+                cv.circle(frame, (x + w - 10, y + 10), 7, (104, 29, 59), -1)
+                dots.append(2)
+
+            if rects[2].HasPoint((x + w, y + h)):
+                cv.drawContours(frame, (cnt,), -1, contour_color, 4)
+                bottom_right_edge = Edge(x + w - 30, y + h - 20)
+
+                cv.circle(frame, (x + w - 30, y + h - 20), 7, (104, 29, 59), -1)
+                dots.append(3)
+
+            if rects[3].HasPoint((x, y + h)):
+                cv.drawContours(frame, (cnt,), -1, contour_color, 4)
+                
+                cv.circle(frame, (x + 30, y + h - 20), 7, (104, 29, 59), -1)
+                dots.append(4)
+
+            if dots:
+                connections.append(dots)
+        
+
+
+        # Если есть один островок
+        solo = None
+
+        for i in range(len(connections)):
+            if len(connections[i]) == 1:
+                solo = connections[i][0]
+
+        for i in range(len(connections)):
+            if len(connections[i]) == 4 and solo is not None:
+                connections[i].remove(solo)
+
+        lines = []
+
+        #cv.imshow('frame', self.Scale(frame))
+        #cv.waitKey(0)
+        if len(connections) == 1 and len(connections[0]) == 4:
+            return lines, top_left_edge, bottom_right_edge
+
+        gorizontal_line_length = abs(int((bottom_right_edge.x - top_left_edge.x) * 0.3055555555555556))  
+        vertical_line_length = abs(int((top_left_edge.y - bottom_right_edge.y) / 3)) 
+            
+        def AreConnected(i1, i2):
+            for one in connections:
+                if (i1 in one) and (i2 in one):
+                    return True
+            return False
+
+        def ConnectOnHorizontal(lines, left_coords, right_coords, i1, i2):
+            f = AreConnected(i1, i2)
+
+            if f:
+                lines.append(  (left_coords, right_coords)  )
+            else:
+                lines.append((  left_coords, (left_coords[0] + gorizontal_line_length, left_coords[1])   ))
+                lines.append((  (right_coords[0] - gorizontal_line_length, right_coords[1]) , right_coords ))
+
+        def ConnectOnVerticalLine(lines, top_coords, bottom_coords, i1, i2):
+            f = AreConnected(i1, i2)
+
+            if f:
+                lines.append(  (top_coords, bottom_coords)  )
+            else:
+                lines.append((  top_coords, (top_coords[0], top_coords[1] + vertical_line_length)   ))
+                lines.append((  (bottom_coords[0], bottom_coords[1] - vertical_line_length) , bottom_coords ))
+
+        ConnectOnHorizontal(lines, top_left_edge.xy, (bottom_right_edge.x, top_left_edge.y), 1, 2)
+        ConnectOnHorizontal(lines, (top_left_edge.x, bottom_right_edge.y), bottom_right_edge.xy, 3, 4)
+
+        ConnectOnVerticalLine(lines, top_left_edge.xy, (top_left_edge.x, bottom_right_edge.y), 1, 4)
+        ConnectOnVerticalLine(lines, (bottom_right_edge.x, top_left_edge.y), bottom_right_edge.xy, 2, 3)
+
+        for line in lines:
+            cv.line(frame, line[0], line[1], (0, 255, 0), 3)
+
+        #cv.imshow('frame', self.Scale(frame))
+        #cv.waitKey(0)
+        return lines, top_left_edge, bottom_right_edge
+
+
+    def InitializeWalls(self, frame_hsv, frame):
+        new_frame = frame.copy()
+        lines, top_left_edge, bottom_right_edge = self.InitializeNormalWalls(frame_hsv, new_frame)
+        if lines:
+            for line in lines:
+                cv.line(frame, line[0], line[1], (0, 255, 0), 3)
+            cv.imshow('frame', self.Scale(frame))
+            cv.waitKey(0)
+            return
+
+        top_left = self.field.top_left_coords
+        top_right = self.field.top_right_coords
+        bottom_left = self.field.bottom_left_coords
+        bottom_right = self.field.bottom_right_coords
+        min_x = min(top_left[0], bottom_left[0])
+        max_x = max(top_right[0],bottom_right[0])
+        min_y = min(top_right[1], top_left[1])
+        max_y = max(bottom_right[1], bottom_left[1])
+
+        step_x = (max_x - min_x) // 20
+        step_y = (max_y - min_y) // 20
+
+        rect_1_coords = (min_x + step_x*4, min_y + step_y * 2)
+        rect_2_coords = (rect_1_coords[0] + step_x * 9, rect_1_coords[1])
+        rect_3_coords = (rect_2_coords[0], rect_1_coords[1] + step_y * 13)
+        rect_4_coords = (rect_1_coords[0], rect_3_coords[1])
+
+        mid_1 = ( (rect_1_coords[0] + rect_2_coords[0]) // 2  , (rect_1_coords[1] + rect_2_coords[1]) // 2  )
+        mid_2 = ( (rect_1_coords[0] + rect_4_coords[0]) // 2  , (rect_1_coords[1] + rect_4_coords[1]) // 2  )
+        mid_3 = ( (rect_2_coords[0] + rect_3_coords[0]) // 2  , (rect_2_coords[1] + rect_3_coords[1]) // 2  )
+        mid_4 = ( (rect_3_coords[0] + rect_4_coords[0]) // 2  , (rect_3_coords[1] + rect_4_coords[1]) // 2  )
+
+        rect_1_coords = mid_1
+        rect_2_coords = mid_2
+        rect_3_coords = mid_3
+        rect_4_coords = mid_4
+
+        x_len = step_x * 3
+        y_len = step_y * 4
+
+        class Rect:
+            def __init__(self, coords, x_len, y_len):
+                self.A = (x, y) = coords
+                self.B = (x + x_len, y)
+                self.C = (x + x_len, y + y_len)
+                self.D = (x, y + y_len)
+                self.x_len = x_len
+                self.y_len = y_len
+
+            def HasPoint(self, coords):
+                x, y = coords
+                return (self.A[0] <= x <= self.A[0] + self.x_len) and (self.A[1] <= y <= self.A[1] + self.y_len)
+
+        mids = [mid_1, mid_2, mid_3, mid_4]
+
+        index = None
+        all_dead = False
+        for i in range(len(mids)):
+            new_frame = frame.copy()
+            coords = mids[i]
+
+            cv.rectangle(new_frame, coords, (coords[0] + x_len, coords[1] + y_len), (255,255,255), -1)
+            
+            lines, top_left_edge, bottom_right_edge = self.InitializeNormalWalls(cv.cvtColor(new_frame, cv.COLOR_BGR2HSV), new_frame)
+            if not lines:
+                if index is not None:
+                    all_dead = True
+                else:
+                    index = i + 1
+
+        lines = []
+
+        gorizontal_line_length = abs(int((bottom_right_edge.x - top_left_edge.x) * 0.3055555555555556))  
+        vertical_line_length = abs(int((top_left_edge.y - bottom_right_edge.y) / 3)) 
+        ban_line = ((-100, -100), (-100, -100))
+
+        x_min, y_min = top_left_edge.x, top_left_edge.y
+        x_max, y_max = bottom_right_edge.x, bottom_right_edge.y
+
+        def ConnectOnHorizontal(lines, left_coords, right_coords):
+            lines.append((  left_coords, (left_coords[0] + gorizontal_line_length, left_coords[1])   ))
+            lines.append((  (right_coords[0] - gorizontal_line_length, right_coords[1]) , right_coords ))
+
+        def ConnectOnVerticalLine(lines, top_coords, bottom_coords):
+            lines.append((  top_coords, (top_coords[0], top_coords[1] + vertical_line_length)   ))
+            lines.append((  (bottom_coords[0], bottom_coords[1] - vertical_line_length) , bottom_coords ))
+
+        lines.append(((x_min, y_min), (x_max, y_min)))
+        lines.append(((x_min, y_min), (x_min, y_max)))
+        lines.append(((x_max, y_min), (x_max, y_max)))
+        lines.append(((x_min, y_max), (x_max, y_max)))
+
+        if not all_dead:
+            if index == 1:
+                ban_line = ((x_min, y_min), (x_max, y_min))
+                ConnectOnHorizontal(lines, top_left_edge.xy, (bottom_right_edge.x, top_left_edge.y))
+
+                # первый со вторым hor
+            elif index == 2:
+                ban_line = ((x_min, y_min), (x_min, y_max))
+                ConnectOnVerticalLine(lines, top_left_edge.xy, (top_left_edge.x, bottom_right_edge.y))
+                # первый с четвертым vert
+            elif index == 3:
+                ban_line = ((x_max, y_min), (x_max, y_max))
+                ConnectOnVerticalLine(lines, (bottom_right_edge.x, top_left_edge.y), bottom_right_edge.xy)
+                # второй с третьим vert
+            elif index == 4:
+                ban_line = ((x_min, y_max), (x_max, y_max))
+                ConnectOnHorizontal(lines, (top_left_edge.x, bottom_right_edge.y), bottom_right_edge.xy)
+                # третий с четвертым hor
+            if ban_line in lines:
+                lines.remove(ban_line)
+
+        for line in lines:
+            cv.line(frame, line[0], line[1], (0, 255, 0), 3)
+
+        cv.imshow('frame', self.Scale(frame))
+        cv.waitKey(0)
+        
+        
+
 
     """ General functions """
     #colors -> tuple((lower_color_1, higher_color_1), (ower_color_2, higher_color_2), ...)
@@ -341,8 +674,14 @@ class HighCamera:
         frame_hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
 
         if self.frame_counter == 1:  
+            #try:
             self.InitializeField(frame_hsv)
             self.InitializeBase(frame_hsv)
+            self.InitializeWalls(frame_hsv, frame)
+            self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
+            self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
+            #except Exception:
+                
 
         if self.frame_counter % 10 == 0:
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
@@ -358,3 +697,5 @@ class HighCamera:
     def run(self):
         while self.MakeIteration():
             pass
+
+
