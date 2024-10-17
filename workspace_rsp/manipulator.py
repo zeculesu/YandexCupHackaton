@@ -1,5 +1,7 @@
 from servo import ServoController, angle_limit
 import config as cfg
+from servo import claw_limit
+from servo import main_manipulator_angle_limit
 
 
 class ManipulatorController(ServoController):
@@ -23,6 +25,10 @@ class ManipulatorController(ServoController):
         self.cur_claw_angle = cfg.CLOSED_CLAW
         self.set_position()
 
+    def grab_cube(self):
+        self.cur_claw_angle = cfg.CUBE_GRAB_ANGLE
+        self.set_position()
+
     def open_claw(self) -> None:
         self.cur_claw_angle = cfg.OPENED_CLAW
         self.set_position()
@@ -40,7 +46,7 @@ class ManipulatorController(ServoController):
         self.set_position()
 
     def move_main(self, angle: int) -> None:
-        self.cur_main_angle = angle_limit(angle + self.cur_main_angle)
+        self.cur_main_angle = main_manipulator_angle_limit(angle + self.cur_main_angle)
         self.set_position()
 
     def move_cubit(self, angle: int) -> None:
@@ -52,7 +58,7 @@ class ManipulatorController(ServoController):
         self.set_position()
 
     def move_claw(self, angle: int) -> None:
-        self.cur_main_angle = angle_limit(angle + self.cur_claw_angle)
+        self.cur_claw_angle = claw_limit(angle + self.cur_claw_angle)
         self.set_position()
 
     def set_position(self) -> None:
