@@ -47,8 +47,6 @@ class HighCamera:
         self.frame_counter = 1
 
 
-
-
     # Debug boy
     def Lol(self, path):
         frame = cv.imread(path)
@@ -811,6 +809,8 @@ class HighCamera:
             self.InitializeValueObject(1, frame_hsv, frame)
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
+            
+            self.logger.info("Initialization DONE")
                 
         if self.frame_counter % 10 == 0:
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
