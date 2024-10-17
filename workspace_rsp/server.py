@@ -104,7 +104,6 @@ class Server:
                     self.manipulator.move_claw(val)
 
             elif 18 <= command <= 20:
-                # todo поправить положение дефолтное
                 if command == 18:
                     self.camera.set_default_position()
                 elif command == 19:
