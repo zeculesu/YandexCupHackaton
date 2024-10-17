@@ -19,7 +19,6 @@ class Manipulator(Enum):
     OPEN_CLAW = 11
     SET_THROW_POSITION = 12
     SET_DOWN_POSITION = 13
-    # TODO уточнить в клиенте и сервере что там параметры должны приниматься
     MOVE_MAIN = 14
     MOVE_CUBIT = 15
     MOVE_WRIST = 16

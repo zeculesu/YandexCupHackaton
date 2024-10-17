@@ -6,7 +6,6 @@ import socket
 # то вернет False
 # в САМОМ конце работы надо закрыть сокет с помощью sender.socket_close()
 
-host, port = "192.168.2.156", 4242
 
 class Sender:
     def __init__(self, host, port):

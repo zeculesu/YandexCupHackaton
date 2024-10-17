@@ -2,11 +2,9 @@ import signal
 import socket
 import sys
 
-port = 4242
-
-
-class Jesys:
-    def __init__(self, motor, camera, manipulator):
+class Server:
+    def __init__(self, port, motor, camera, manipulator):
+        self.port = port
         self.motor = motor
         self.manipulator = manipulator
         self.camera = camera
@@ -17,7 +15,7 @@ class Jesys:
     def start_server(self):
         try:
             self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.server_socket.bind(('0.0.0.0', port))
+            self.server_socket.bind(('0.0.0.0', self.port))
             self.server_socket.listen(5)
 
             print("Сервер запущен, ожидается подключение...")
