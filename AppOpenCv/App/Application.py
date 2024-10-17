@@ -1,11 +1,7 @@
-from asyncio import sleep
-
-from command_enum import Manipulator, Motor
-from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
-from sender import Sender
+import result_type as ResType
+
 from HighCamera import HighCamera
-from result_type import Ok, result_type
 
 import logging
 
@@ -34,32 +30,14 @@ class App:
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
-        self.HighCamera = HighCamera(l)
+        self.HighCamera = HighCamera(r)
 
     def run(self):
-        from time import sleep
+        while self.HighCamera.MakeIteration():            
+            pass
+            
+        return ResType.result_type(ResType.Ok(200))    
 
-        zaderjka = 10
-        while True:
-            high_camera_res = self.HighCamera.MakeIteration()
-
-            if not high_camera_res:
-                break
-
-            sender = Sender(host, port)
-            if not sender.try_connection():
-                break
-
-            # SENDER COMMAND
-            ...
-            angle = ...
-            # message = MOTOR_STOP
-            message = f"{MANIPULATOR_MOVE_CLAW} {angle}"
-            if not sender.send_command(message):
-                break
-
-        return result_type(Ok(200))
-      
     def startimage(self):
         for i in range(1, 20):
             print(i)
@@ -68,7 +46,4 @@ class App:
 
 
 if __name__ == "__main__":
-    host, port = "192.168.2.156", 4141
     App().run()
-    App().startimage()
-
