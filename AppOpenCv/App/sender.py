@@ -1,4 +1,6 @@
 import socket
+from time import sleep
+
 
 # пишем sender = Sender(self.host, self.port) потом
 # sender.start_client(), проверяем если там не False, то всё хорошо, мы подключились
@@ -44,3 +46,11 @@ class Sender:
             self.socket_close()
             return False
         return True
+
+    def try_connection(self):
+        for i in range(5):
+            self.start_client()
+            sleep(5)
+
+    def check_connection(self):
+        return True if self.socket else False

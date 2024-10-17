@@ -1,9 +1,8 @@
 import time
 
-from client.sender import Sender
-import workspace_rsp.config as cfg
+from AppOpenCv.App.sender import Sender
 
-host, port = "192.168.2.156", cfg.PORT
+host, port = "192.168.2.156", 4141
 
 sender = Sender(host, port)
 while True:

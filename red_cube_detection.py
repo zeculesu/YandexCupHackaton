@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from client.sender import Sender
+from AppOpenCv.App.sender import Sender
 
 
 def find_red_cube(frame):
