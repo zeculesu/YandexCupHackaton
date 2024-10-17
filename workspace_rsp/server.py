@@ -2,6 +2,7 @@ import signal
 import socket
 import sys
 
+
 class Server:
     def __init__(self, port, motor, camera, manipulator):
         self.port = port
@@ -25,11 +26,7 @@ class Server:
                 print(f"Подключено: {addr}")
                 self.handle_client(client_socket)
         except Exception as e:
-            self.server_socket.close()
             print(e)
-        finally:
-            if self.server_socket:
-                self.server_socket.close()
 
     def handle_client(self, client_socket):
         while True:
@@ -107,7 +104,7 @@ class Server:
                     self.manipulator.move_claw(val)
 
             elif 18 <= command <= 20:
-                #todo поправить положение дефолтное
+                # todo поправить положение дефолтное
                 if command == 18:
                     self.camera.set_default_position()
                 elif command == 19:
