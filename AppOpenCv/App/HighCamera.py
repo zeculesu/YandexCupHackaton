@@ -38,7 +38,7 @@ class HighCamera:
         self.green_base = Base(Owner.WE)
         self.walls = None
 
-
+        #  value objects
         self.listValueObjects = [ValueObj(0), ValueObj(1)]
 
         #  setting the video
