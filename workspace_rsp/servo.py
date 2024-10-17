@@ -1,5 +1,6 @@
 import config as cfg
 from i2c import I2c
+from config import ANGLE_MAX
 
 
 def angle_limit(angle):
@@ -9,6 +10,26 @@ def angle_limit(angle):
         angle = cfg.ANGLE_MIN
     return angle
 
+def claw_limit(angle):
+    if angle > cfg.CLOSED_CLAW:
+        angle = cfg.CLOSED_CLAW
+    elif angle < cfg.OPENED_CLAW:
+        angle = cfg.OPENED_CLAW
+    return angle
+
+def cubit_cam_limit(angle):
+    if angle > cfg.ANGLE_MAX:
+        angle = cfg,ANGLE_MAX
+    elif angle < cfg.CAM_CUBIT_MIN:
+        angle = cfg.CAM_CUBIT_MIN
+    return angle
+
+def main_manipulator_angle_limit(angle):
+    if angle > cfg.MAIN_UP:
+        angle = cfg.MAIN_UP
+    elif angle < cfg.MAIN_DOWN:
+        angle = cfg.MAIN_DOWN
+    return angle
 
 class ServoController(object):
 

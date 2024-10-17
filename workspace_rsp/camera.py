@@ -1,5 +1,6 @@
 from servo import ServoController, angle_limit
 import config as cfg
+from servo import cubit_cam_limit
 
 
 class CameraController(ServoController):
@@ -20,7 +21,7 @@ class CameraController(ServoController):
         self.set(cfg.CAM_ROTATE_PORT, self.cur_rotate_angle)
 
     def move_cubit(self, angle: int) -> None:
-        self.cur_cubit_angle = angle_limit(angle + self.cur_cubit_angle)
+        self.cur_cubit_angle = cubit_cam_limit(angle + self.cur_cubit_angle)
         self.set_position()
 
     def move_rotate(self, angle: int) -> None:
