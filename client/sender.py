@@ -22,7 +22,8 @@ class Sender:
         self.socket.connect((self.host, self.port))
 
     def socket_close(self):
-        self.socket.close()
+        if self.socket is not None:
+            self.socket.close()
         self.socket = None
 
     def send(self, message):
@@ -40,5 +41,6 @@ class Sender:
             self.connect()
         except ConnectionError:
             print("Подключение оборвалось...")
+            self.socket_close()
             return False
         return True
