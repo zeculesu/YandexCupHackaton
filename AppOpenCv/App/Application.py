@@ -38,9 +38,12 @@ class App:
         self.HighCamera = HighCamera(l)
 
     def run(self):
-        from time import sleep
+        while self.HighCamera.MakeIteration():
+            pass
 
-        zaderjka = 10
+
+
+    def RunRobot(self):
         while True:
             high_camera_res = self.HighCamera.MakeIteration()
 
@@ -52,12 +55,12 @@ class App:
                 break
 
             # SENDER COMMAND
-            ...
+            """...
             angle = ...
             # message = MOTOR_STOP
             message = f"{MANIPULATOR_MOVE_CLAW} {angle}"
             if not sender.send_command(message):
-                break
+                break"""
 
         return result_type(Ok(200))
       
@@ -71,4 +74,4 @@ class App:
 if __name__ == "__main__":
     host, port = "192.168.2.156", 4141
     App().run()
-    App().startimage()
+    

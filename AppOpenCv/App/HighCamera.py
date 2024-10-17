@@ -7,6 +7,7 @@ from Robot import Robot
 from Rectangle import Rectangle
 from Base import Base
 from Owner import Owner
+from ValueObject import ValueObj
 
 from Log_manager import Logs
 import logging
@@ -37,10 +38,15 @@ class HighCamera:
         self.green_base = Base(Owner.WE)
         self.walls = None
 
+
+        self.listValueObjects = [ValueObj(0), ValueObj(1)]
+
         #  setting the video
         video_name = path
         self.capture = cv.VideoCapture(video_name)
         self.frame_counter = 1
+
+
 
 
     # Debug boy
@@ -211,7 +217,7 @@ class HighCamera:
         self.red_base.bottom_right_coords = rect.C
         self.red_base.bottom_left_coords = rect.D
 
-    
+
     """ Initialize walls """
     def InitializeNormalWalls(self, frame_hsv, frame):
         #cv.imshow('frame', self.Scale(frame))
@@ -512,7 +518,51 @@ class HighCamera:
         cv.imshow('frame', self.Scale(frame))
         cv.waitKey(0)
         
-    
+
+    """ Initialize ValueObjects """
+    def InitializeValueObject(self, index, frame_hsv, frame):
+        #CALIBRATE
+        lower_bound = np.array([0, 178, 130])
+        upper_bound = np.array([179, 255, 255])
+
+        Object = self.listValueObjects[index]
+
+        Object.is_lower_color = lower_bound
+        Object.is_upper_color = upper_bound
+
+        #CALIBRATE
+        min_area = 200
+        max_area = 800 
+        kernel = 30
+        
+        #CALIBRATE
+        ratio = 0.7
+        eps = 0.15
+        
+        contours = self.DetectContours(frame_hsv, ((lower_bound,
+                                                     upper_bound),),min_area, max_area, kernel)
+        
+        if not contours:
+            raise Exception("InitializeValueObject: No countours by DetectContours. Check min_area, max_area, colors")
+        
+        contours = self.SelectContoursByRatio(contours, ratio, eps=eps)
+        
+        if not contours:
+            raise Exception("InitializeValueObject : No contours by SelectContoursByRatio")
+
+        result_contour = self.GetMaxAreaContour(contours)
+
+        if result_contour is None:
+            raise Exception("InitializeValueObject: No countours were found in area-range of", min_area,
+                            max_area)
+
+        Object.contour = result_contour 
+        center = Rectangle(result_contour).center
+        
+        Object.x = center[0]
+        Object.y = center[1]
+
+
     """ Initialize + Button buttons (in pairs) """
     def UpdatePairButton(self, frame_hsv, color_name_1, color_name_2, frame):
         min_area = 300
@@ -609,6 +659,74 @@ class HighCamera:
         self.buttons[color_name_2].contour = best_pair[1]
 
 
+    """ Update ValueObjects """
+    def UpdateValueObjects(self, index: int, frame_hsv, frame):
+        min_area = 100
+        max_area = 500
+        kernel = 30
+
+        Object = self.listValueObjects[index]
+
+        contours = self.DetectContours(frame_hsv, ((Object.is_lower_color,
+                                                   Object.is_upper_color),), 
+                                    min_area,
+                                    max_area,
+                                    kernel)
+       
+        self.logger.info(f"contours : {contours}")
+        if not contours:
+            Object.is_visible = False
+            Object.contour = None
+            self.logger.info(f"UpdateValueObjects : no contours by DetectContours (number {index})")
+            return
+        
+        best_contours = []
+        for contour in contours:
+            center = Rectangle(contour).center 
+            
+            if not (self.red_base.Contains(center)):
+                best_contours.append(contour)
+        
+        min_delta_center = 1000 
+        Contour_this_object = None        
+       
+        for contour in best_contours:
+            center = Rectangle(contour).center
+            if min_delta_center > abs(center[0] - Object.x):
+                min_delta_center = abs(center[0] - Object.x)
+                Contour_this_object = contour
+        
+        if Contour_this_object is None:
+            Object.is_visible = False;
+            Object.contour = None
+            self.logger.info("UpdateValueObjects : Contour_this_object is not detected")
+            return
+
+        self.logger.info(f"result this contour : {Contour_this_object}")
+        center = Rectangle(Contour_this_object).center
+
+        new_x = center[0]
+        new_y = center[1]
+        
+        if Object.x is not None:
+            Old_x = Object.x
+            Old_y = Object.y
+
+
+            if abs(Old_x - new_x) > Object.max_delta_for_static or abs(Old_y - new_y) > Object.max_delta_for_static:
+                Object.is_dynamic = True
+                Object.is_grabbed = True
+            else:
+                Object.is_dynamic = False
+                Object.is_grabbed = False    
+         
+
+        Object.x = new_x
+        Object.y = new_y
+        Object.contour = Contour_this_object
+
+
+
     """ Rendering elements """
     def ShowButtons(self, frame):
         for color in self.buttons.map:
@@ -636,10 +754,19 @@ class HighCamera:
         cv.drawContours(frame, (self.green_base.contour,), -1, green_base_contour_color, 4)
         cv.drawContours(frame, (self.red_base.contour,), -1, red_base_contour_color, 4)
 
+    def ShowValueObject(self, frame):
+        red_value_object_contour_color = (255,255,255)
+       
+        cv.drawContours(frame, (self.listValueObjects[0].contour,), -1, red_value_object_contour_color,
+                        2)
+        cv.drawContours(frame, (self.listValueObjects[0].contour,), -1, red_value_object_contour_color,
+                        2)
+
     def ShowPolygon(self, frame):
         self.ShowField(frame)
         self.ShowButtons(frame)
         self.ShowBases(frame)
+        self.ShowValueObject(frame)
         return self.ShowFrame(frame)
 
     """ Getting frame, already modified """
@@ -667,6 +794,7 @@ class HighCamera:
     """ Iteration logic """
     def MakeIteration(self):
         if not self.capture.isOpened():
+
             return False
 
         frame = self.GetFrame(self.capture)
@@ -679,12 +807,17 @@ class HighCamera:
             self.InitializeField(frame_hsv)
             self.InitializeBase(frame_hsv)
             self.InitializeWalls(frame_hsv, frame)
+            self.InitializeValueObject(0, frame_hsv, frame)
+            self.InitializeValueObject(1, frame_hsv, frame)
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
                 
         if self.frame_counter % 10 == 0:
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
+
+            self.UpdateValueObjects(0, frame_hsv, frame)
+            self.UpdateValueObjects(1, frame_hsv, frame)
 
         if not self.ShowPolygon(frame):
             return False
