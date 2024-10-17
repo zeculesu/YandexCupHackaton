@@ -19,6 +19,7 @@ class Manipulator(Enum):
     OPEN_CLAW = 11
     SET_THROW_POSITION = 12
     SET_DOWN_POSITION = 13
+    # передавать со значением угла
     MOVE_MAIN = 14
     MOVE_CUBIT = 15
     MOVE_WRIST = 16
@@ -27,5 +28,6 @@ class Manipulator(Enum):
 
 class Camera(Enum):
     DEFAULT_POSITION = 18
+    # передавать со значением угла
     MOVE_CUBIT = 19
     MOVE_ROTATE = 20
