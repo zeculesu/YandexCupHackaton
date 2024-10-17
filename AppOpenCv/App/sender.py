@@ -1,4 +1,8 @@
 import socket
+from time import sleep
+
+from Log_manager import Logs
+
 
 # пишем sender = Sender(self.host, self.port) потом
 # sender.start_client(), проверяем если там не False, то всё хорошо, мы подключились
@@ -9,6 +13,8 @@ import socket
 
 class Sender:
     def __init__(self, host, port):
+        LogClass = Logs()
+        self.logger = LogClass.getLogger()
         self.host = host
         self.port = port
         self.socket = None
@@ -36,11 +42,40 @@ class Sender:
 
     def start_client(self):
         try:
-            print("Подключение к серверу...")
+            self.logger.info("Подключение к серверу...")
             self.create_socket()
             self.connect()
         except ConnectionError:
-            print("Подключение оборвалось...")
+            self.logger.info("Подключение оборвалось...")
             self.socket_close()
             return False
+        return True
+
+    def try_connection(self):
+        for i in range(5):
+            if self.start_client():
+                return True
+            sleep(5)
+        self.logger.error("Connection Error")
+        return False
+
+    def check_connection(self):
+        return True if self.socket else False
+
+    def send_command(self, command):
+        if not self.check_connection():
+            if not self.try_connection():
+                return False
+        resp = self.send(command)
+        return self.handle_response(resp, command)
+
+    def handle_response(self, resp, command):
+        if not resp:
+            self.logger.warning("no response from server")
+            if not self.try_connection():
+                return False
+            resp = self.send(command)
+            if not resp:
+                return False
+        self.logger.info(f"answer from server: {resp}")
         return True

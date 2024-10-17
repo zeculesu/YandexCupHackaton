@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import requests
 
-url = "http://192.168.2.156:8080/?action=stream"
+
 def find_red_cube(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 

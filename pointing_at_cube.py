@@ -1,4 +1,4 @@
-from client.sender import Sender
+from AppOpenCv.App.sender import Sender
 
 host, port = "192.168.2.156", 4242
 sender = Sender(host, port)
