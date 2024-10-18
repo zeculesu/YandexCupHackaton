@@ -30,7 +30,7 @@ class App:
     def __init__(self):
         LogClass = Logs()
         self.logger = LogClass.getLogger()
-        self.logger.info("Create Logs")
+        self.logger.critical("Create Logs")
 
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
