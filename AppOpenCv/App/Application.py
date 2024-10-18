@@ -32,10 +32,11 @@ class App:
         self.logger = LogClass.getLogger()
         self.logger.info("Create Logs")
 
-        t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
+        t1 = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
+        t2 = 'rtsp://Admin:rtf123@192.168.2.251/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
-        self.HighCamera = HighCamera(l)
+        self.HighCamera = HighCamera(r)
 
     def run(self):
         while self.HighCamera.MakeIteration():
