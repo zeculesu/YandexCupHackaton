@@ -24,6 +24,13 @@ def cubit_cam_limit(angle):
         angle = cfg.CAM_CUBIT_MIN
     return angle
 
+def main_manipulator_angle_limit(angle):
+    if angle > cfg.MAIN_UP:
+        angle = cfg.MAIN_UP
+    elif angle < cfg.MAIN_DOWN:
+        angle = cfg.MAIN_DOWN
+    return angle
+
 class ServoController(object):
 
     def __init__(self):

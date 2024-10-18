@@ -104,7 +104,7 @@ class Server:
                 elif command == 18:
                     self.manipulator.move_claw(val)
                 elif command == 19:
-                    self.motor.forward(4)
+                    self.motor.forward(6)
                     self.manipulator.grab_cube()
                     time.sleep(2)
                     self.manipulator.set_default_position()
