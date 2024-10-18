@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+
 from Buttons import Buttons
 from Button import Button
 from Field import Field
@@ -8,10 +9,10 @@ from Rectangle import Rectangle
 from Base import Base
 from Owner import Owner
 from ValueObject import ValueObj
+from TableObject import TableObj 
 
 from Log_manager import Logs
 import logging
-
 
 
 class HighCamera:
@@ -37,6 +38,7 @@ class HighCamera:
         self.red_base = Base(Owner.ENEMY)
         self.green_base = Base(Owner.WE)
         self.walls = None
+        self.Table = TableObj() 
 
         #  value objects
         self.listValueObjects = [ValueObj(0), ValueObj(1)]
@@ -560,6 +562,48 @@ class HighCamera:
         Object.x = center[0]
         Object.y = center[1]
 
+    """ Initialize Table """
+    def InitializeTable(self, frame_hsv, frame):
+        lower_bound = np.array([0, 0, 0])
+        upper_bound = np.array([200, 255, 100])
+        
+        self.Table.is_lower_color = lower_bound
+        self.Table.is_upper_color = upper_bound
+
+        #CALIBRATE
+        min_area = 1000
+        max_area = 10000
+        kernel = 30
+
+        #CALIBRATE
+        ratio = 0.7
+        eps = 0.15
+        
+        contours = self.DetectContours(frame_hsv, ((lower_bound, upper_bound),), min_area, max_area, kernel)
+
+        if not contours:
+            self.logger.debug("InitializeTable : No countors by DetectContours. Check min_area, max_area, colors")
+            return
+
+        contours = self.SelectContoursByRatio(contours, ratio, eps=eps)
+
+        if not contours:
+            self.logger.debug("InitializeTable : No countours by SelectContoursByRatio")
+            return
+
+        result_contour = self.GetMaxAreaContour(contours)
+
+        if result_contour is None:
+            self.logger.debug("InitializeValueObject : No countours were found in area-range of", min_area, max_area)
+            return
+
+        self.Table = result_contour
+        center = Rectangle(result_contour).center
+
+        self.Table.x = center[0]
+        self.Table.y = center[1]
+
+        self.logger.info("InitializeTable DONE")
 
     """ Initialize + Button buttons (in pairs) """
     def UpdatePairButton(self, frame_hsv, color_name_1, color_name_2, frame):
@@ -671,7 +715,6 @@ class HighCamera:
                                     max_area,
                                     kernel)
        
-        self.logger.info(f"contours : {contours}")
         if not contours:
             Object.is_visible = False
             Object.contour = None
@@ -697,10 +740,8 @@ class HighCamera:
         if Contour_this_object is None:
             Object.is_visible = False;
             Object.contour = None
-            self.logger.info("UpdateValueObjects : Contour_this_object is not detected")
             return
 
-        self.logger.info(f"result this contour : {Contour_this_object}")
         center = Rectangle(Contour_this_object).center
 
         new_x = center[0]
@@ -741,6 +782,9 @@ class HighCamera:
         contour_color = (0,255,0)
         cv.drawContours(frame, (self.field.contour,), -1, contour_color, 4)
 
+    def ShowTable(self, frame):
+        cv.drawContours(frame, (self.Table.contour,), -1, (0,255,0), 4) 
+
     def ShowFrame(self, frame):
         cv.imshow('frame', self.Scale(frame))
         return not (cv.waitKey(1) & 0xFF == ord('q'))
@@ -765,6 +809,7 @@ class HighCamera:
         self.ShowButtons(frame)
         self.ShowBases(frame)
         self.ShowValueObject(frame)
+        self.ShowTable(frame)
         return self.ShowFrame(frame)
 
     """ Getting frame, already modified """
@@ -807,6 +852,7 @@ class HighCamera:
             self.InitializeWalls(frame_hsv, frame)
             self.InitializeValueObject(0, frame_hsv, frame)
             self.InitializeValueObject(1, frame_hsv, frame)
+            self.InitializeTable(frame_hsv, frame)
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
             
