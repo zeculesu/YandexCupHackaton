@@ -1,6 +1,6 @@
-import buzzer
-import rgb_panel
-import config as cfg
+import workspace.buzzer
+import workspace.rgb_panel
+import workspace.config as cfg
 
 rgb_panel = rgb_panel.RGBPanel()
 rgb_panel.set_all([cfg.WHITE, cfg.WHITE, cfg.BLUE, cfg.BLUE, cfg.BLUE, cfg.RED, cfg.RED, cfg.RED])
