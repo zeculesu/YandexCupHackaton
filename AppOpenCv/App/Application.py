@@ -36,7 +36,8 @@ class App:
         t2 = 'rtsp://Admin:rtf123@192.168.2.251/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
-        self.HighCamera = HighCamera(r)
+        self.HighCamera = HighCamera(l)
+
 
     def run(self):
         while self.HighCamera.MakeIteration():

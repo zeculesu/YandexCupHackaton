@@ -11,9 +11,200 @@ from Owner import Owner
 from ValueObject import ValueObj
 from TableObject import TableObj 
 from Boarder import Boarder
+from Bucket import Bucket
 
 from Log_manager import Logs
 import logging
+
+
+
+import math
+import matplotlib.pyplot as plt
+
+show_animation = True
+
+class AStarPath:
+    def __init__(self, robot_radius, grid_size, x_obstacle, y_obstacle):
+        self.grid_size = grid_size
+        self.robot_radius = robot_radius
+        self.create_obstacle_map(x_obstacle, y_obstacle)
+        self.path = self.get_path()
+
+    class Node:
+        def __init__(self, x, y, cost, path):
+            self.x = x
+            self.y = y
+            self.cost = cost
+            self.path = path
+        
+        def __str__(self):
+            return str(self.x)+'+'+str(self.y)+','+str(self.cost)+','+str(self.path)
+    
+    @staticmethod
+    def calc_heuristic(num1, num2):
+        weight = 1.0
+        return weight * math.sqrt((num1.x-num2.x)**2 + (num1.y-num2.y)**2)
+
+    def calc_grid_position(self, idx, p):
+        return idx * self.grid_size + p
+
+    def calc_xy(self, position, min_position):
+        return round((position-min_position) / self.grid_size)
+    
+    def calc_grid_idx(self, node):
+        return (node.y-self.y_min) * self.x_width + (node.x-self.x_min)
+    
+    def check_validity(self, node):
+        x_position = self.calc_grid_position(node.x, self.x_min)
+        y_position = self.calc_grid_position(node.y, self.y_min)
+
+        if x_position < self.x_min:
+            return False
+        elif y_position < self.y_min:
+            return False
+        elif x_position >= self.x_max:
+            return False
+        elif y_position >= self.y_max:
+            return False
+        if self.obstacle_pos[node.x][node.y]:
+            return False
+        return True
+
+    def create_obstacle_map(self, x_obstacle, y_obstacle):
+        self.x_min = round(min(x_obstacle))
+        self.y_min = round(min(y_obstacle))
+        self.x_max = round(max(x_obstacle))
+        self.y_max = round(max(y_obstacle))
+        self.x_width = round((self.x_max - self.x_min) / self.grid_size)
+        self.y_width = round((self.y_max - self.y_min) / self.grid_size)
+        self.obstacle_pos = [[False for i in range(self.y_width)] for i in range(self.x_width)]
+        for idx_x in range(self.x_width):
+            x = self.calc_grid_position(idx_x, self.x_min)
+            for idx_y in range(self.y_width):
+                y = self.calc_grid_position(idx_y, self.y_min)
+                for idx_x_obstacle, idx_y_obstacle in zip(x_obstacle, y_obstacle):
+                    d = math.sqrt((idx_x_obstacle - x)**2 + (idx_y_obstacle - y)**2)
+                    if d <= self.robot_radius:
+                        self.obstacle_pos[idx_x][idx_y] = True
+                        break
+    
+    @staticmethod
+    def get_path():
+        path = [[1, 0, 1],
+                [0, 1, 1],
+                [-1, 0, 1],
+                [0, -1, 1],
+                [-1, -1, math.sqrt(2)],
+                [-1, 1, math.sqrt(2)],
+                [1, -1, math.sqrt(2)],
+                [1, 1, math.sqrt(2)]]
+
+        return path
+
+    def calc_final_path(self, end_node, record_closed):
+        x_out_path, y_out_path = [self.calc_grid_position(end_node.x, self.x_min)], [self.calc_grid_position(end_node.y, self.y_min)]
+        path = end_node.path
+        while path != -1:
+            n = record_closed[path]
+            x_out_path.append(self.calc_grid_position(n.x, self.x_min))
+            y_out_path.append(self.calc_grid_position(n.y, self.y_min))
+            path = n.path
+
+        return x_out_path, y_out_path
+
+    def a_star_search(self, start_x, start_y, end_x, end_y):
+        start_node = self.Node(self.calc_xy(start_x, self.x_min), self.calc_xy(start_y, self.y_min), 0.0, -1)
+        end_node = self.Node(self.calc_xy(end_x, self.x_min), self.calc_xy(end_y, self.y_min), 0.0, -1)
+
+        record_open, record_closed = dict(), dict()
+        record_open[self.calc_grid_idx(start_node)] = start_node
+
+        while True:
+            if len(record_open) == 0:
+                print('Check Record Validity')
+                break
+
+            total_cost = min(record_open, key=lambda x: record_open[x].cost + self.calc_heuristic(end_node, record_open[x]))
+            cost_collection = record_open[total_cost]
+        
+            if show_animation:  # pragma: no cover
+                plt.plot(self.calc_grid_position(cost_collection.x, self.x_min),  self.calc_grid_position(cost_collection.y, self.y_min), "xy")
+                if len(record_closed.keys())%10 == 0:
+                    plt.pause(0.001)
+            
+            if cost_collection.x == end_node.x and cost_collection.y == end_node.y:
+                print("Finished!")
+                end_node.path = cost_collection.path
+                end_node.cost = cost_collection.cost
+                break
+
+            del record_open[total_cost]
+            record_closed[total_cost] = cost_collection
+
+            for i, _ in enumerate(self.path):
+                node = self.Node(cost_collection.x + self.path[i][0], cost_collection.y + self.path[i][1], cost_collection.cost + self.path[i][2], total_cost)
+                idx_node = self.calc_grid_idx(node)
+
+                if not self.check_validity(node):
+                    continue
+
+                if idx_node in record_closed:
+                    continue
+
+                if idx_node not in record_open:
+                    record_open[idx_node] = node
+                else:
+                    if record_open[idx_node].cost > node.cost:
+                        record_open[idx_node] = node
+
+        x_out_path, y_out_path = self.calc_final_path(end_node, record_closed)
+
+        return x_out_path, y_out_path
+
+def mainAstar(image):
+    start_x = 177
+    start_y = 218
+    end_x = 177
+    end_y = 25
+    grid_size = 4.0
+    robot_radius = 20.0
+
+    #image = cv.imread(image)
+    #image = cv.resize(image, (200,200))
+
+    gray = cv.resize(image, (600, 400))
+    (width, length, _) = gray.shape
+
+    x_obstacle, y_obstacle = [], []
+    for i in range(width):
+        for j in range(length):
+            if gray[i][j][0] >= 150:
+              y_obstacle.append(i)
+              x_obstacle.append(j)
+
+
+    if show_animation:
+        print('sdfsdf')
+        plt.plot(x_obstacle, y_obstacle, ".k")
+        plt.plot(start_x, start_y, "og")
+        plt.plot(end_x, end_y, "xb")
+        plt.grid(True)
+        plt.axis("equal")
+
+    print('started astar')
+    a_star = AStarPath(robot_radius, grid_size, x_obstacle, y_obstacle)
+
+    x_out_path, y_out_path = a_star.a_star_search(start_x, start_y, end_x, end_y)
+
+    # if show_animation:
+    #     plt.plot(x_out_path, y_out_path, "r")
+    #     plt.show()
+
+
+
+
+
+
 
 
 class HighCamera:
@@ -40,6 +231,7 @@ class HighCamera:
         self.green_base = Base(Owner.WE)
         self.walls = Boarder()
         self.table = TableObj() 
+        self.listBuckets = [Bucket(), Bucket()]
 
         #  value objects
         self.listValueObjects = [ValueObj(0), ValueObj(1)]
@@ -78,7 +270,7 @@ class HighCamera:
 
     def ShowContours(self, contours, frame):
         new_frame = frame.copy()
-        cv.drawContours(new_frame, contours, -1, (120, 60, 150), -1)
+        cv.drawContours(new_frame, contours, -1, (120, 60, 150), 4)
         cv.imshow('frame', self.Scale(new_frame))
         cv.waitKey(0)
 
@@ -108,7 +300,41 @@ class HighCamera:
             if min_area <= rectangle.area <= max_area:
                 new_contours.append(rectangle.contour)
 
-        return new_contours
+        return new_contours 
+    
+    def GetRectFromButtons(self):
+        pass
+
+    """ Path constructor """
+    def MakeMapImage(self, frame):
+        map_frame = np.zeros((frame.shape[0] + 200, frame.shape[1] + 200, frame.shape[2]))
+        # Draw field
+        cv.drawContours(map_frame, (self.field.contour,), -1, (255, 255, 255), 4)
+
+        # Draw walls
+        for line in self.walls.lines:
+            cv.line(map_frame, line[0], line[1], (255, 255, 255), 3)
+
+        # Draw table
+        cv.drawContours(map_frame, (self.table.contour,), -1, (255,255,255), -1) 
+
+        # Draw buttons
+        # for color in self.buttons.map:
+        #     button = self.buttons[color]
+        #     if button.contour is not None:
+        #         cv.drawContours(map_frame, (button.contour,), -1, (255,255,255), -1)
+
+
+        # Draw buckets
+        # ...
+
+
+        cv.imshow('frame', self.Scale(map_frame))
+        cv.waitKey(0)
+        print('finish my frame')
+        return map_frame
+
+    
 
 
     """ Initialize field """
@@ -156,7 +382,6 @@ class HighCamera:
 
         if self.field.contour is None:
             self.logger.critical("Initialize : Field : no contours with max area")
-
 
         min_x = int(self.field.contour[:, :, 0:1].min())
         max_x = int(self.field.contour[:, :, 0:1].max())
@@ -228,10 +453,16 @@ class HighCamera:
 
         self.green_base.contour = result_contour
         rect = self.GetRectangleFromContour(result_contour)
-        self.green_base.top_left_coords = rect.A
-        self.green_base.top_right_coords = rect.B
-        self.green_base.bottom_right_coords = rect.C
-        self.green_base.bottom_left_coords = rect.D
+
+        (x,y,w,h) = cv.boundingRect(result_contour)
+        min_x, max_x = x, x+w
+        min_y, max_y = y, y+h
+
+        self.green_base.top_left_coords = (min_x, min_y)
+        self.green_base.top_right_coords = (max_x, min_y)
+        self.green_base.bottom_right_coords = (max_x, max_y)
+        self.green_base.bottom_left_coords = (min_x, max_y)
+
         self.logger.info("Initialize : Base : green : DONE")
 
         contours = self.DetectContours(frame_hsv, ((lower_red_1, higher_red_1), (lower_red_2, higher_red_2)),
@@ -263,13 +494,16 @@ class HighCamera:
 
         self.red_base.contour = result_contour
         rect = self.GetRectangleFromContour(result_contour)
-        self.red_base.top_left_coords = rect.A
-        self.red_base.top_right_coords = rect.B
-        self.red_base.bottom_right_coords = rect.C
-        self.red_base.bottom_left_coords = rect.D
+        (x,y,w,h) = cv.boundingRect(result_contour)
+        min_x, max_x = x, x+w
+        min_y, max_y = y, y+h
+
+        self.red_base.top_left_coords = (min_x, min_y)
+        self.red_base.top_right_coords = (max_x, min_y)
+        self.red_base.bottom_right_coords = (max_x, max_y)
+        self.red_base.bottom_left_coords = (min_x, max_y)
 
         self.logger.info("Initialize : Base : red : DONE")
-
 
     """ Initialize walls """
     def InitializeNormalWalls(self, frame_hsv, frame):
@@ -570,6 +804,182 @@ class HighCamera:
 
         self.walls.lines = lines
         self.logger.info("Initialize : Walls : DONE")
+
+    def InitializeBucket(self, Base, frame_hsv, frame):
+        if (self.listBuckets[0].top_right_coords[0] is None):
+            Bucket = self.listBuckets[0]
+        else:
+            Bucket = self.listBuckets[1]
+
+        # Coord. Base
+        Top_base_l = Base.top_left_coords
+        Top_base_r = Base.top_right_coords
+
+        bottom_base_l = Base.bottom_left_coords
+        bottom_base_r = Base.bottom_right_coords
+
+        ratio = 0.309
+
+        # Coord. Field
+        Top_field_l = self.field.top_left_coords
+        Top_field_r = self.field.top_right_coords
+
+        bottom_field_l = self.field.bottom_left_coords
+        bottom_field_r = self.field.bottom_right_coords
+
+        Eps = 150
+
+        # if left site Vertical
+        if (abs(Top_base_l[0] - Top_field_l[0]) < Eps and abs(bottom_base_l - bottom_field_l) < Eps):
+            delta_x = Top_base_r[0] - Top_base_l[0]
+            delta_y = Top_base_l[1] - bottom_base_l[1]
+
+            ratio_x = 0.333
+            ratio_y = 0.309
+
+            # Top left
+            coord_x = Top_base_l[0]
+            coord_y = Top_base_l[1] - ratio_y * delta_y
+
+            Bucket.top_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket left site vertical, TOP LEFT : {(coord_x, coord_y)}")
+
+            # Top right
+            coord_x = Top_base_r[0] - ratio_x * delta_x
+            coord_y = Top_base_r[1] - ratio_y * delta_y
+
+            Bucket.top_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket left site vertical, TOP RIGHT : {(coord_x, coord_y)}")
+
+            #  Bottom left
+            coord_x = bottom_base_l[0]
+            coord_y = bottom_base_l[1] + ratio_y * delta_y
+
+            Bucket.bottom_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket left site vertical, BOTTOM LEFT : {(coord_x, coord_y)}")
+
+            # Bottom right
+            coord_x = bottom_base_r[0] - ratio_x * delta_x
+            coord_y = bottom_base_r[1] - ratio_y * delta_y
+
+            Bucket.bottom_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket left site Vertical, BOTTOM RIGHT : {(coord_x, coord_y)}")
+
+        # if top site Gorizont
+        elif (abs(Top_base_l[1] - Top_field_l[1]) < Eps and abs(Top_base_r[1] - Top_field_r[1]) < Eps):
+            delta_x = Top_base_l[0] - Top_base_r[0]
+            delta_y = Top_base_l[1] - bottom_base_l[1]
+
+            ratio_x = 0.309
+            ratio_y = 0.333
+
+            # Top right
+            coord_x = Top_base_r[0] - ratio_x * delta_x
+            coord_y = Top_base_r[1]
+
+            Bucket.top_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket top site Gorizont, TOP RIGHT : {(coord_x, coord_y)}")
+
+            # Top left
+            coord_x = Top_base_l[0] + ratio_x * delta_x
+            coord_y = Top_base_l[1]
+
+            Bucket.top_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket top site Gorizont, TOP LEFT : {(coord_x, coord_y)}")
+
+            # Bottom left
+            coord_x = bottom_base_l[0] + ratio_x * delta_x
+            coord_y = bottom_base_l[1] + ratio_y * delta_y
+
+            Bucket.bottom_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket top site gorizont, BOTTOM LEFT : {(coord_x, coord_y)}")
+
+            # Bottom right
+            coord_x = bottom_base_r[0] - ratio_x * delta_x
+            coord_y = bottom_base_r[1] + ratio_y * delta_y
+
+            Bucket.bottom_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket top site gorizont, BOTTOM RIGHT : {(coord_x, coord_y)}")
+
+        # if right site Vertical
+        elif (abs(Top_base_r[0] - Top_base_r[0]) < Eps and abs(bottom_base_r[0] - bottom_field_r[0]) < Eps):
+            delta_x = Top_base_r[0] - Top_base_l[0]
+            delta_y = Top_base_r[1] - bottom_base_r[1]
+
+            ratio_x = 0.333
+            ratio_y = 0.309
+
+            # Top right
+            coord_x = Top_base_r[0]
+            coord_y = Top_base_r[1] - ratio_y * delta_y
+
+
+            Bucket.top_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket right site Vertical, TOP RIGHT : {(coord_x, coord_y)}")
+
+            # Top left
+            coord_x = Top_base_l[0] + ratio_x * delta_x
+            coord_y = Top_base_l[1] - ratio_y * delta_y
+
+            Bucket.top_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket right site Vertical, TOP LEFT : {(coord_x, coord_y)}")
+
+            # Bottom left
+            coord_x = bottom_base_l[0] + ratio_x * delta_x
+            coord_y = bottom_base_l[1] + ratio_y * delta_y
+
+            Bucket.bottom_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket right site Vertical, BOTTOM LEFT : {(coord_x, coord_y)}")
+
+            # Bottom right
+            coord_x = bottom_base_r[0]
+            coord_y = bottom_base_r[1] + ratio_y * delta_y
+
+            Bucket.bottom_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket right site vertical, BOTTOM RIGHT : {(coord_x, coord_y)}")
+
+        # if bottom site Gorizont
+        elif (abs(bottom_base_r[1] - bottom_field_r[1]) < Eps and abs(bottom_base_l[1] -
+                                                                      bottom_field_l[1]) < Eps):
+
+            delta_x = Top_base_r[0] - Top_base_l[0]
+            delta_y = Top_base_l[1] - bottom_base_l[1]
+
+            ratio_x = 0.309
+            ratio_y = 0.333
+
+            # Top right
+            coord_x = Top_base_r[0] - ratio_x * delta_x
+            coord_y = Top_base_r[1] - ratio_y * delta_y
+
+            Bucket.top_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket bottom site Gorizont, TOP RIGHT : {(coord_x, coord_y)}")
+
+            # Top left
+            coord_x = Top_base_l[0] + ratio_x * delta_x
+            coord_y = Top_base_l[1] - ratio_y * delta_y
+
+            Bucket.top_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket bottom site Gorizont, TOP LEFT : {(coord_x, coord_y)}")
+
+            # Bottom left
+            coord_x = bottom_base_l[0] + ratio_x * delta_x
+            coord_y = bottom_base_l[1]
+
+            Bucket.bottom_left_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket bottom site Gorizont, BOTTOM LEFT : {(coord_x, coord_y)}")
+
+            # Bottom right
+            coord_x = bottom_base_r[0] - ratio_x * delta_x
+            coord_y = bottom_base_r[1]
+
+            Bucket.bottom_right_coords = (coord_x, coord_y)
+            self.logger.debug("Bucket bottom site Gorizont, BOTTOM RIGHT : {(coord_x, coord_y)}")
+
+        Bucket.top_right_coords = tuple(map(int, Bucket.top_right_coords))
+        Bucket.top_left_coords = tuple(map(int, Bucket.top_left_coords))
+        Bucket.bottom_right_coords = tuple(map(int, Bucket.bottom_right_coords))
+        Bucket.bottom_left_coords = tuple(map(int, Bucket.bottom_left_coords))
 
     """ Initialize ValueObjects """
     def InitializeValueObject(self, index, frame_hsv, frame):
@@ -875,7 +1285,6 @@ class HighCamera:
         Object.contour = Contour_this_object
 
 
-
     """ Rendering elements """
     def ShowButtons(self, frame):
         for color in self.buttons.map:
@@ -926,6 +1335,17 @@ class HighCamera:
         for line in self.walls.lines:
             cv.line(frame, line[0], line[1], (123, 92, 200), 3)
 
+    def ShowBuckets(self, frame):
+        contour_color = (0,255,0)
+
+        for bucket in self.listBuckets:
+            a, b, c, d = bucket.top_left_coords, bucket.top_right_coords, bucket.bottom_right_coords, bucket.bottom_left_coords
+            cv.line(frame, a, b, contour_color, 10)
+            cv.line(frame, b, c, contour_color, 10)
+            cv.line(frame, c, d, contour_color, 10)
+            cv.line(frame, d, a, contour_color, 10)
+
+
     def ShowPolygon(self, frame):
         self.ShowField(frame)
         self.ShowButtons(frame)
@@ -933,8 +1353,9 @@ class HighCamera:
         self.ShowValueObject(frame)
         self.ShowWalls(frame)
         self.ShowTable(frame)
-        #Buckets
+        self.ShowBuckets(frame)
         return self.ShowFrame(frame)
+
 
     """ Getting frame, already modified """
     def GetFrame(self, capture):
@@ -958,6 +1379,7 @@ class HighCamera:
 
         return frame[y:y+h, x:x+w]
 
+
     """ Iteration logic """
     def MakeIteration(self):
         if not self.capture.isOpened():
@@ -975,42 +1397,55 @@ class HighCamera:
             self.InitializeField(frame_hsv, frame)
             self.ShowField(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
             self.InitializeBases(frame_hsv, frame)
             self.ShowBases(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
             self.InitializeWalls(frame_hsv, frame)
             self.ShowWalls(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
             self.InitializeValueObject(0, frame_hsv, frame)
             self.ShowValueObject(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
             self.InitializeValueObject(1, frame_hsv, frame)
             self.ShowValueObject(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
-            # Debug
+            self.InitializeBucket(self.green_base, frame_hsv, frame)
+            self.InitializeBucket(self.red_base, frame_hsv, frame)
+            self.ShowBuckets(frame)
+            cv.imshow('frame', self.Scale(frame))
+            #cv.waitKey(0)
+
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
-
-            self.ShowButtons(frame)
-            cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
 
             self.InitializeTable(frame_hsv, frame)
             self.ShowTable(frame)
             cv.imshow('frame', self.Scale(frame))
-            cv.waitKey(0)
+            #cv.waitKey(0)
 
-        if self.frame_counter % 10 == 0:
+            #mainAstar(
+            
+             #   ) 
+
+        self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
+        self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
+
+        if self.frame_counter % 20 == 0:
+            #self.MakeMapImage(frame)
+            #cv.imshow('frame', self.Scale(frame))
+            #cv.waitKey(0)
+
+
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
 
