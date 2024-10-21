@@ -18,4 +18,19 @@ server = Server(port, motor, camera, manipulator, rgb)
 # TODO раскидать по папочкам
 
 print("Start")
-server.start_server()
+motor.right_on_place()
+motor.right_on_place()
+motor.right_on_place()
+motor.right_on_place()
+rgb.set_all([cfg.GREEN] * 8)
+motor.forward(20)
+motor.left_on_place()
+motor.left_on_place()
+motor.left_on_place()
+rgb.set_all([cfg.RED] * 8)
+
+motor.forward(45)
+
+for i in range(13):
+    motor.left_on_place()
+#server.start_server()
