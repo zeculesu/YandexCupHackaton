@@ -1,7 +1,6 @@
 
 from asyncio import sleep
 
-from command_enum import Manipulator, Motor
 from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
 from sender import Sender

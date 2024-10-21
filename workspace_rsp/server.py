@@ -35,9 +35,9 @@ class Server:
                 message = client_socket.recv(1024).decode('utf-8')
                 if not message:
                     break
-                print(f"Получено сообщение: {message}")
+                # print(f"Получено сообщение: {message}")
                 self.read_request(message)
-                client_socket.send("Сообщение получено".encode('utf-8'))
+                client_socket.send("OK".encode('utf-8'))
             except Exception as e:
                 print(e)
         client_socket.close()
@@ -56,7 +56,7 @@ class Server:
             else:
                 command = command_line[0]
 
-            if 0 <= command <= 8:
+            if 0 <= command <= 9:
                 if command == 0:
                     self.motor.stop()
                 elif command == 1:
@@ -75,6 +75,9 @@ class Server:
                     self.motor.left_forward()
                 elif command == 8:
                     self.motor.left_backward()
+                # TODO ЭТО ТОЛЬКО ТЕСТОВОЕ ИСЛПОЬЗОВАТЬ НЕЛЬЗЯ
+                elif command == 9:
+                    self.motor.forward(val)
 
             elif 10 <= command <= 29:
                 if command == 10:
@@ -91,7 +94,7 @@ class Server:
 
                 elif command == 14:
                     self.manipulator.set_down_position()
-                #todo вырывает провод
+
                 elif command == 15:
                     self.manipulator.move_main(val)
 

@@ -1,5 +1,3 @@
-from AppOpenCv.App.config import *
-
 import socket
 from time import sleep
 
@@ -77,4 +75,9 @@ class Sender:
 
 sender = Sender("192.168.2.156", 4141)
 sender.start_client()
+while True:
+    comm = input()
+    if comm == "exit":
+        break
+    print(sender.send_command(comm))
 # exec(open("send_command_console_python.py").read())
