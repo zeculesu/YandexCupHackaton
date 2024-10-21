@@ -36,7 +36,7 @@ class Server:
                 message = client_socket.recv(1024).decode('utf-8')
                 if not message:
                     break
-                print(f"Получено сообщение: {message}")
+                # print(f"Получено сообщение: {message}")
                 self.read_request(message)
                 client_socket.send("OK".encode('utf-8'))
             except Exception as e:

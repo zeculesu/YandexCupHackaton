@@ -26,8 +26,6 @@ class AI:
                 class_names = self.model.names  # {id: "class_name"}
                 class_name = class_names.get(class_id, "Unknown")
 
-
-
                 if scenario == 0 and class_id in [2, 3]:
                     x1, y1, x2, y2 = box.xyxy[0]
                     x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
@@ -55,4 +53,12 @@ class AI:
                 #       f'Center: ({center_x}, {center_y}), Class ID: [{class_id}], Class Name: [{class_name}]')
 
 
+                print(f'Box (x1, y1, x2, y2): ({x1}, {y1}, {x2}, {y2}), Center: ({center_x}, {center_y}), Class ID: [{class_id}], Class Name: [{class_name}]')
+
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(frame, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
+
+            cv2.imshow('RobotCamera', frame)
+            cv2.waitKey(1)
 
