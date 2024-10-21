@@ -6,7 +6,8 @@ from AI import AI
 
 class RobotCamera:
     def __init__(self, index):
-        self.indexCamera = "http://192.168.2.156:8080/?action=stream"
+        self.indexCamera = index
+        self.AI = AI()
 
     def read(self):
         global boobs
@@ -27,4 +28,7 @@ class RobotCamera:
         frame = self.read()
 
         if frame is not None:
-            AI.live_ai(frame)
+            self.AI.live_ai(frame)
+            return True
+        else:
+            return False

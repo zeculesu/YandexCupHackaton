@@ -1,6 +1,8 @@
 
 from asyncio import sleep
 
+import cv2
+
 from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
 from sender import Sender
@@ -36,11 +38,10 @@ class App:
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
         Live_r = "http://192.168.2.156:8080/?action=stream"
-        self.HighCamera = HighCamera("../../../Left_1.avi")
         self.RobotCameta = RobotCamera(Live_r)
 
     def run(self):
-        while self.HighCamera.MakeIteration() and self.RobotCameta.make_iteration():
+        while self.RobotCameta.make_iteration():
             pass
 
     def RunRobot(self):

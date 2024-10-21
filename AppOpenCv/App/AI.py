@@ -1,11 +1,10 @@
 import cv2
 from ultralytics import YOLO
-from RobotCamera import RobotCamera
 
 
 class AI:
-    def __init__(self, model_path):
-        self.model_path = model_path
+    def __init__(self):
+        self.model_path = "C:/Users/UrFU/Desktop/Yandex.StudCamp/RobotCamera.pt"
         self.model = YOLO(self.model_path)
 
     def live_ai(self, frame):
@@ -32,17 +31,5 @@ class AI:
                 cv2.putText(frame, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
                 cv2.circle(frame, (center_x, center_y), 5, (0, 0, 255), -1)
 
-            cv2.imshow('YOLO', frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                exit()
-
-
-if __name__ == "__main__":
-    model_path = 'C:/Users/Jessy/PycharmProjects/YandexCupHackaton1/AppOpenCv/App/yolo_training/exp_high/weights/best.pt'
-
-    robot_camera = RobotCamera()
-    ai = AI(model_path)
-
-    while True:
-        robot_camera.make_iteration()
+            cv2.imshow('RobotCamera', frame)
+            cv2.waitKey(1)
