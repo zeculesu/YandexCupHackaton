@@ -22,14 +22,14 @@ class MotorController(object):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_forward()
         self.m3m4_reverse()
-        sleep(cfg.STEP_TIME * n)
+        sleep(cfg.STEP_TIME * n/2)
         self.stop()
 
     def left_on_place(self, n=1):
         self.set_both_speed(cfg.DEFAULT_SPEED, cfg.DEFAULT_SPEED)
         self.m1m2_reverse()
         self.m3m4_forward()
-        sleep(cfg.STEP_TIME * n)
+        sleep(cfg.STEP_TIME * n/2)
         self.stop()
 
     def right_forward(self, n=1):

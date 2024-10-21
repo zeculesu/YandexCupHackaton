@@ -82,7 +82,7 @@ class Function(object):
 			time.sleep(0.05)
 			if cfg.BARCODE_DATE == 'start':		# 检测到起始信号，start的二维码
 				#print(cfg.BARCODE_DATE)
-				buf = bytes([0xff, 0x13, 0x0a, 0x00, 0xff])
+				buf = boobs([0xff, 0x13, 0x0a, 0x00, 0xff])
 				socket.sendbuf(buf)
 				#cfg.LIGHT_STATUS = cfg.TURN_FORWARD
 				car_light.set_ledgroup(cfg.CAR_LIGHT, 8, cfg.COLOR['blue'])
@@ -90,7 +90,7 @@ class Function(object):
 				code_status = 1						# code_status
 			elif cfg.BARCODE_DATE == 'stop':	# 检测到结束信号，stop的二维码
 				#print(cfg.BARCODE_DATE)
-				buf = bytes([0xff, 0x13, 0x0a, 0x01, 0xff])
+				buf = boobs([0xff, 0x13, 0x0a, 0x01, 0xff])
 				socket.sendbuf(buf)
 				#cfg.LIGHT_STATUS = cfg.STOP
 				car_light.set_ledgroup(cfg.CAR_LIGHT, 8, cfg.COLOR['white'])
@@ -100,7 +100,7 @@ class Function(object):
 			if code_status:
 				if cfg.BARCODE_DATE == 'forward':	# 检测到forward的二维码，小车前进
 					#print("forward")
-					buf = bytes([0xff, 0x13, 0x0a, 0x02, 0xff])
+					buf = boobs([0xff, 0x13, 0x0a, 0x02, 0xff])
 					socket.sendbuf(buf)
 					cfg.LIGHT_STATUS = cfg.TURN_FORWARD
 					go.forward()
@@ -109,7 +109,7 @@ class Function(object):
 					time.sleep(0.5)
 				elif cfg.BARCODE_DATE == 'back':	# 检测到back的二维码，小车后退
 					#print("back")
-					buf = bytes([0xff, 0x13, 0x0a, 0x03, 0xff])
+					buf = boobs([0xff, 0x13, 0x0a, 0x03, 0xff])
 					socket.sendbuf(buf)
 					cfg.LIGHT_STATUS = cfg.TURN_BACK
 					go.back()
@@ -118,7 +118,7 @@ class Function(object):
 					time.sleep(0.5)
 				elif cfg.BARCODE_DATE == 'left':	# 检测到left的二维码，小车左转
 					#print("left")
-					buf = bytes([0xff, 0x13, 0x0a, 0x04, 0xff])
+					buf = boobs([0xff, 0x13, 0x0a, 0x04, 0xff])
 					socket.sendbuf(buf)
 					cfg.LIGHT_STATUS = cfg.TURN_LEFT
 					go.left()
@@ -127,7 +127,7 @@ class Function(object):
 					time.sleep(0.5)
 				elif cfg.BARCODE_DATE == 'right':	# 检测到right的二维码，小车右转
 					#print("right")
-					buf = bytes([0xff, 0x13, 0x0a, 0x05, 0xff])
+					buf = boobs([0xff, 0x13, 0x0a, 0x05, 0xff])
 					socket.sendbuf(buf)
 					cfg.LIGHT_STATUS = cfg.TURN_RIGHT
 					go.right()

@@ -275,7 +275,7 @@ class Socket:
 				print("CRUISING_FLAG正常模式 %d " % cfg.CRUISING_FLAG)
 
 		elif buffer == [0x31, 0x00, 0x00]:  # 查询电量信息
-			buf = bytes([0xff, 0x31, 0x01, cfg.POWER, 0xff])
+			buf = boobs([0xff, 0x31, 0x01, cfg.POWER, 0xff])
 			self.sendbuf(buf)
 
 		elif buffer[0] == 0x32:  # 存储角度
