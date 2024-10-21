@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import requests
+from AI import AI
 
 
 class RobotCamera:
@@ -18,3 +19,9 @@ class RobotCamera:
                     boobs = boobs[b + 2:]
                     img = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                     return img
+
+    def make_iteration(self):
+        frame = self.read()
+
+        if frame is not None:
+            AI.live_ai(frame)

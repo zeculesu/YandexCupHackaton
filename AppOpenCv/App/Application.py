@@ -6,6 +6,7 @@ from Log_manager import Logs
 from sender import Sender
 from HighCamera import HighCamera
 from result_type import Ok, result_type
+from RobotCamera import RobotCamera
 
 import logging
 
@@ -37,7 +38,7 @@ class App:
         self.HighCamera = HighCamera("../../../Left_1.avi")
 
     def run(self):
-        while self.HighCamera.MakeIteration():
+        while self.HighCamera.MakeIteration() and se:
             pass
 
     def RunRobot(self):
