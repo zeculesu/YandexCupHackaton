@@ -1,12 +1,17 @@
 import cv2
 import numpy as np
 import requests
+from AI import AI
 
 
 class RobotCamera:
+    def __init__(self, index):
+        self.indexCamera = index
+        self.AI = AI()
+
     def read(self):
         global boobs
-        stream = requests.get("http://192.168.2.156:8080/?action=stream", stream=True)
+        stream = requests.get(self.indexCamera, stream=True)
         if stream.status_code == 200:
             boobs = bytes()
             for chunk in stream.iter_content(chunk_size=1024):
@@ -18,3 +23,12 @@ class RobotCamera:
                     boobs = boobs[b + 2:]
                     img = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2.IMREAD_COLOR)
                     return img
+
+    def make_iteration(self):
+        frame = self.read()
+
+        if frame is not None:
+            self.AI.live_ai(frame)
+            return True
+        else:
+            return False

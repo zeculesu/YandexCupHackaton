@@ -1,8 +1,16 @@
+from asyncio import sleep
+
+import cv2
+
+from config import MANIPULATOR_MOVE_CLAW
+from Log_manager import Logs
+from sender import Sender
 import config as cfg
 from HighCamera import HighCamera
-from Log_manager import Logs
 from result_type import Ok, result_type
-from sender import Sender
+from RobotCamera import RobotCamera
+
+import logging
 
 """
 
@@ -31,10 +39,11 @@ class App:
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
-        self.HighCamera = HighCamera("../../../Left_1.avi")
+        Live_r = "http://192.168.2.156:8080/?action=stream"
+        self.RobotCameta = RobotCamera(Live_r)
 
     def run(self):
-        while self.HighCamera.MakeIteration():
+        while self.RobotCameta.make_iteration():
             pass
 
     def RunRobot(self):
