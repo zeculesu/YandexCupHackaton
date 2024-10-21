@@ -1,6 +1,5 @@
 from AppOpenCv.App.config import *
 
-from AppOpenCv.App.sender import Sender
 import socket
 from time import sleep
 
@@ -12,7 +11,7 @@ from time import sleep
 # в САМОМ конце работы надо закрыть сокет с помощью sender.socket_close()
 
 
-class Sender324:
+class Sender:
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -78,7 +77,23 @@ class Sender324:
 
 sender = Sender("192.168.2.156", 4141)
 sender.start_client()
-sender.send_command("42 4")
-sleep(5)
-sender.send_command("42 1")
+sender.send_command("3")
+sender.send_command("3")
+sender.send_command("3")
+sender.send_command("9 10")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("9 40")
+
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+sender.send_command("4")
+while True:
+    sender.send_command(input())
 # exec(open("send_command_console_python.py").read())
+# 9 40

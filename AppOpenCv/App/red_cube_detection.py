@@ -111,7 +111,8 @@ def press_button():
     sender.send_command(cfg.MANIPULATOR_CLOSE_CLAW)
 
     while True:
-        test_cam_read = RobotCamera()
+        index = "http://192.168.2.156:8080/?action=stream"
+        test_cam_read = RobotCamera(index)
         img = test_cam_read.read()
         center = find_blue_button(img)
         if center is not None:
