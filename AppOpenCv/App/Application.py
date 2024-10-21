@@ -1,3 +1,4 @@
+
 from asyncio import sleep
 
 import cv2
@@ -6,9 +7,9 @@ from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
 from sender import Sender
 import config as cfg
-from HighCamera import HighCamera
+# from HighCamera import HighCamera
 from result_type import Ok, result_type
-from RobotCamera import RobotCamera
+import RobotCamera
 
 import logging
 
@@ -40,10 +41,11 @@ class App:
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
         Live_r = "http://192.168.2.156:8080/?action=stream"
-        self.RobotCameta = RobotCamera(Live_r)
+        self.RobotCamera = RobotCamera.RobotCamera(Live_r)
 
     def run(self):
-        while self.RobotCameta.make_iteration():
+
+        while self.RobotCamera.make_iteration():
             pass
 
     def RunRobot(self):
@@ -52,14 +54,6 @@ class App:
 
             if not high_camera_res:
                 break
-
-            sender = Sender(host, port)
-            if not sender.try_connection():
-                break
-
-            # УСТАНОВКА ЦВЕТА РОБОТА
-            comm = f"{cfg.SET_COLOR_ROBOT} {self.color}"
-            sender.send_command(comm)
 
             # SENDER COMMAND
             """...
@@ -79,5 +73,9 @@ class App:
 
 if __name__ == "__main__":
     host, port = "192.168.2.156", 4141
+    sender = Sender(host, port)
+    sender.try_connection()
+    comm = f"{cfg.SET_COLOR_ROBOT} {cfg.ROBOT_COLOR}"
+    sender.send_command(comm)
     # TODO ПР ЗАПУСКЕ СТАВИМ КАКОЙ ЦВЕТ
     App(color_robot=cfg.ROBOT_COLOR).run()

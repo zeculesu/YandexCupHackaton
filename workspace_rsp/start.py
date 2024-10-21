@@ -19,3 +19,4 @@ server = Server(port, motor, camera, manipulator, rgb)
 
 print("Start")
 server.start_server()
+

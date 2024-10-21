@@ -1,3 +1,5 @@
+import numpy as np
+
 class Obj:
     def __init__(self):
         self.is_visible: bool = False

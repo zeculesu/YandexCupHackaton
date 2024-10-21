@@ -28,7 +28,7 @@ class RobotCamera:
         frame = self.read()
 
         if frame is not None:
-            self.AI.live_ai(frame)
+            self.AI.live_ai(frame, 0)
             return True
         else:
             return False
