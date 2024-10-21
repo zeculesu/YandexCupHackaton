@@ -1,13 +1,14 @@
 from asyncio import sleep
 
-from sympy.physics.units import stefan_boltzmann_constant
+import cv2
 
-from AppOpenCv.App.command_enum import Manipulator, Motor
-from AppOpenCv.App.config import MANIPULATOR_MOVE_CLAW
+from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
-import result_type as ResType
 from sender import Sender
-from HighCamera import HighCamera
+import config as cfg
+# from HighCamera import HighCamera
+from result_type import Ok, result_type
+import RobotCamera
 
 import logging
 
@@ -27,50 +28,53 @@ import logging
 
 """
 
+
 class App:
-    def __init__(self):
+    def __init__(self, color_robot):
         LogClass = Logs()
         self.logger = LogClass.getLogger()
-        self.logger.info("Create Logs")
+        self.logger.critical("Create Logs")
+        self.color = color_robot
 
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
-        self.HighCamera = HighCamera(l)
+        Live_r = "http://192.168.2.156:8080/?action=stream"
+        self.RobotCamera = RobotCamera.RobotCamera(Live_r)
 
     def run(self):
-        from time import sleep
 
-        zaderjka = 10
+        while self.RobotCamera.make_iteration():
+            pass
+
+    def RunRobot(self):
         while True:
             high_camera_res = self.HighCamera.MakeIteration()
 
             if not high_camera_res:
                 break
 
-            sender = Sender(host, port)
-            if not sender.try_connection():
-                break
-
             # SENDER COMMAND
-            ...
+            """...
             angle = ...
             # message = MOTOR_STOP
             message = f"{MANIPULATOR_MOVE_CLAW} {angle}"
             if not sender.send_command(message):
-                break
+                break"""
 
-        return ResType.result_type(ResType.Ok(200))
-      
+        return result_type(Ok(200))
+
     def startimage(self):
         for i in range(1, 20):
             print(i)
             self.HighCamera.Lol(f'screen{i}.png')
 
 
-
 if __name__ == "__main__":
     host, port = "192.168.2.156", 4141
-    App().run()
-    App().startimage()
-
+    sender = Sender(host, port)
+    sender.try_connection()
+    comm = f"{cfg.SET_COLOR_ROBOT} {cfg.ROBOT_COLOR}"
+    sender.send_command(comm)
+    # TODO ПР ЗАПУСКЕ СТАВИМ КАКОЙ ЦВЕТ
+    App(color_robot=cfg.ROBOT_COLOR).run()
