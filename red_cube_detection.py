@@ -37,14 +37,14 @@ def find_red_cube(frame):
 
 stream = requests.get(url, stream=True)
 if stream.status_code == 200:
-    bytes = bytes()
+    boobs = bytes()
     for chunk in stream.iter_content(chunk_size=1024):
-        bytes += chunk
-        a = bytes.find(b'\xff\xd8') # Начало jpeg
-        b = bytes.find(b'\xff\xd9') # Конец jpeg
+        boobs += chunk
+        a = boobs.find(b'\xff\xd8') # Начало jpeg
+        b = boobs.find(b'\xff\xd9') # Конец jpeg
         if a != -1 and b != -1:
-            jpg = bytes[a:b + 2]
-            bytes = bytes[b + 2:]
+            jpg = boobs[a:b + 2]
+            boobs = boobs[b + 2:]
             img = cv2.imdecode(np.frombuffer(jpg, dtype=np.uint8), cv2. IMREAD_COLOR)
 
             center = find_red_cube(img)
