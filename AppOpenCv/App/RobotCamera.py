@@ -5,9 +5,12 @@ from AI import AI
 
 
 class RobotCamera:
+    def __init__(self, index):
+        self.indexCamera = "http://192.168.2.156:8080/?action=stream"
+
     def read(self):
         global boobs
-        stream = requests.get("http://192.168.2.156:8080/?action=stream", stream=True)
+        stream = requests.get(self.indexCamera, stream=True)
         if stream.status_code == 200:
             boobs = bytes()
             for chunk in stream.iter_content(chunk_size=1024):

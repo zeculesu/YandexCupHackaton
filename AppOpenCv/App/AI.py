@@ -23,7 +23,7 @@ class AI:
                 class_id_tensor = box.cls[0]
                 class_id = int(class_id_tensor.cpu().detach().item())
 
-                class_names = self.model.names # {id: "class_name"}
+                class_names = self.model.names  # {id: "class_name"}
                 class_name = class_names.get(class_id, "Unknown")
 
                 print(f'Box (x1, y1, x2, y2): ({x1}, {y1}, {x2}, {y2}), Center: ({center_x}, {center_y}), Class ID: [{class_id}], Class Name: [{class_name}]')

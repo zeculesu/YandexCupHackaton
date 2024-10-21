@@ -35,10 +35,12 @@ class App:
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
         r = "C:\\Aram\\UrFU\\FromVideo\\Right_1.avi"
+        Live_r = "http://192.168.2.156:8080/?action=stream"
         self.HighCamera = HighCamera("../../../Left_1.avi")
+        self.RobotCameta = RobotCamera(Live_r)
 
     def run(self):
-        while self.HighCamera.MakeIteration() and se:
+        while self.HighCamera.MakeIteration() and self.RobotCameta.make_iteration():
             pass
 
     def RunRobot(self):
