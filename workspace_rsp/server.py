@@ -5,11 +5,12 @@ import time
 
 
 class Server:
-    def __init__(self, port, motor, camera, manipulator):
+    def __init__(self, port, motor, camera, manipulator, rgb_panel):
         self.port = port
         self.motor = motor
         self.manipulator = manipulator
         self.camera = camera
+        self.rgb_panel = rgb_panel
 
         self.server_socket = None
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -120,5 +121,10 @@ class Server:
                     self.camera.move_cubit(val)
                 elif command == 32:
                     self.camera.move_rotate(val)
+
+            elif 41 <= command <= 50:
+                if command == 42:
+                    self.rgb_panel.set_all([val]*8)
+                    self.rgb_panel.set_all_power([val]*8)
         except Exception as e:
             return

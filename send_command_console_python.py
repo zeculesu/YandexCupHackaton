@@ -1,6 +1,6 @@
 import socket
 from time import sleep
-
+import AppOpenCv.App.config as cfg
 
 # пишем sender = Sender(self.host, self.port) потом
 # sender.start_client(), проверяем если там не False, то всё хорошо, мы подключились
@@ -75,6 +75,8 @@ class Sender:
 
 sender = Sender("192.168.2.156", 4141)
 sender.start_client()
+comm = f"{cfg.SET_COLOR_ROBOT} {cfg.ROBOT_COLOR}"
+sender.send_command(comm)
 while True:
     comm = input()
     if comm == "exit":
