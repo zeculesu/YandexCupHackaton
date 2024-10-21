@@ -1,4 +1,3 @@
-
 from asyncio import sleep
 
 import cv2
@@ -6,6 +5,7 @@ import cv2
 from config import MANIPULATOR_MOVE_CLAW
 from Log_manager import Logs
 from sender import Sender
+import config as cfg
 from HighCamera import HighCamera
 from result_type import Ok, result_type
 from RobotCamera import RobotCamera
@@ -28,11 +28,13 @@ import logging
 
 """
 
+
 class App:
-    def __init__(self):
+    def __init__(self, color_robot):
         LogClass = Logs()
         self.logger = LogClass.getLogger()
         self.logger.critical("Create Logs")
+        self.color = color_robot
 
         t = 'rtsp://Admin:rtf123@192.168.2.250/251:554/1/1'
         l = "C:\\Aram\\UrFU\\FromVideo\\Left_1.avi"
@@ -55,6 +57,10 @@ class App:
             if not sender.try_connection():
                 break
 
+            # УСТАНОВКА ЦВЕТА РОБОТА
+            comm = f"{cfg.SET_COLOR_ROBOT} {self.color}"
+            sender.send_command(comm)
+
             # SENDER COMMAND
             """...
             angle = ...
@@ -64,15 +70,14 @@ class App:
                 break"""
 
         return result_type(Ok(200))
-      
+
     def startimage(self):
         for i in range(1, 20):
             print(i)
             self.HighCamera.Lol(f'screen{i}.png')
 
 
-
 if __name__ == "__main__":
     host, port = "192.168.2.156", 4141
-    App().run()
-    
+    # TODO ПР ЗАПУСКЕ СТАВИМ КАКОЙ ЦВЕТ
+    App(color_robot=cfg.ROBOT_COLOR).run()

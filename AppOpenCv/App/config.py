@@ -27,3 +27,12 @@ CAMERA_DEFAULT_POSITION = "30"
 # передавать со значением угла
 CAMERA_MOVE_CUBIT = "31"
 CAMERA_MOVE_ROTATE = "32"
+
+
+# SETTINGS
+# передавать с параметром цвета
+SET_COLOR_ROBOT = "42"
+GREEN = 4
+RED = 1
+
+ROBOT_COLOR = GREEN
