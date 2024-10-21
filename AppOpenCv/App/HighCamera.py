@@ -16,195 +16,7 @@ from Bucket import Bucket
 from Log_manager import Logs
 import logging
 
-
-
-import math
-import matplotlib.pyplot as plt
-
-show_animation = True
-
-class AStarPath:
-    def __init__(self, robot_radius, grid_size, x_obstacle, y_obstacle):
-        self.grid_size = grid_size
-        self.robot_radius = robot_radius
-        self.create_obstacle_map(x_obstacle, y_obstacle)
-        self.path = self.get_path()
-
-    class Node:
-        def __init__(self, x, y, cost, path):
-            self.x = x
-            self.y = y
-            self.cost = cost
-            self.path = path
-        
-        def __str__(self):
-            return str(self.x)+'+'+str(self.y)+','+str(self.cost)+','+str(self.path)
-    
-    @staticmethod
-    def calc_heuristic(num1, num2):
-        weight = 1.0
-        return weight * math.sqrt((num1.x-num2.x)**2 + (num1.y-num2.y)**2)
-
-    def calc_grid_position(self, idx, p):
-        return idx * self.grid_size + p
-
-    def calc_xy(self, position, min_position):
-        return round((position-min_position) / self.grid_size)
-    
-    def calc_grid_idx(self, node):
-        return (node.y-self.y_min) * self.x_width + (node.x-self.x_min)
-    
-    def check_validity(self, node):
-        x_position = self.calc_grid_position(node.x, self.x_min)
-        y_position = self.calc_grid_position(node.y, self.y_min)
-
-        if x_position < self.x_min:
-            return False
-        elif y_position < self.y_min:
-            return False
-        elif x_position >= self.x_max:
-            return False
-        elif y_position >= self.y_max:
-            return False
-        if self.obstacle_pos[node.x][node.y]:
-            return False
-        return True
-
-    def create_obstacle_map(self, x_obstacle, y_obstacle):
-        self.x_min = round(min(x_obstacle))
-        self.y_min = round(min(y_obstacle))
-        self.x_max = round(max(x_obstacle))
-        self.y_max = round(max(y_obstacle))
-        self.x_width = round((self.x_max - self.x_min) / self.grid_size)
-        self.y_width = round((self.y_max - self.y_min) / self.grid_size)
-        self.obstacle_pos = [[False for i in range(self.y_width)] for i in range(self.x_width)]
-        for idx_x in range(self.x_width):
-            x = self.calc_grid_position(idx_x, self.x_min)
-            for idx_y in range(self.y_width):
-                y = self.calc_grid_position(idx_y, self.y_min)
-                for idx_x_obstacle, idx_y_obstacle in zip(x_obstacle, y_obstacle):
-                    d = math.sqrt((idx_x_obstacle - x)**2 + (idx_y_obstacle - y)**2)
-                    if d <= self.robot_radius:
-                        self.obstacle_pos[idx_x][idx_y] = True
-                        break
-    
-    @staticmethod
-    def get_path():
-        path = [[1, 0, 1],
-                [0, 1, 1],
-                [-1, 0, 1],
-                [0, -1, 1],
-                [-1, -1, math.sqrt(2)],
-                [-1, 1, math.sqrt(2)],
-                [1, -1, math.sqrt(2)],
-                [1, 1, math.sqrt(2)]]
-
-        return path
-
-    def calc_final_path(self, end_node, record_closed):
-        x_out_path, y_out_path = [self.calc_grid_position(end_node.x, self.x_min)], [self.calc_grid_position(end_node.y, self.y_min)]
-        path = end_node.path
-        while path != -1:
-            n = record_closed[path]
-            x_out_path.append(self.calc_grid_position(n.x, self.x_min))
-            y_out_path.append(self.calc_grid_position(n.y, self.y_min))
-            path = n.path
-
-        return x_out_path, y_out_path
-
-    def a_star_search(self, start_x, start_y, end_x, end_y):
-        start_node = self.Node(self.calc_xy(start_x, self.x_min), self.calc_xy(start_y, self.y_min), 0.0, -1)
-        end_node = self.Node(self.calc_xy(end_x, self.x_min), self.calc_xy(end_y, self.y_min), 0.0, -1)
-
-        record_open, record_closed = dict(), dict()
-        record_open[self.calc_grid_idx(start_node)] = start_node
-
-        while True:
-            if len(record_open) == 0:
-                print('Check Record Validity')
-                break
-
-            total_cost = min(record_open, key=lambda x: record_open[x].cost + self.calc_heuristic(end_node, record_open[x]))
-            cost_collection = record_open[total_cost]
-        
-            if show_animation:  # pragma: no cover
-                plt.plot(self.calc_grid_position(cost_collection.x, self.x_min),  self.calc_grid_position(cost_collection.y, self.y_min), "xy")
-                if len(record_closed.keys())%10 == 0:
-                    plt.pause(0.001)
-            
-            if cost_collection.x == end_node.x and cost_collection.y == end_node.y:
-                print("Finished!")
-                end_node.path = cost_collection.path
-                end_node.cost = cost_collection.cost
-                break
-
-            del record_open[total_cost]
-            record_closed[total_cost] = cost_collection
-
-            for i, _ in enumerate(self.path):
-                node = self.Node(cost_collection.x + self.path[i][0], cost_collection.y + self.path[i][1], cost_collection.cost + self.path[i][2], total_cost)
-                idx_node = self.calc_grid_idx(node)
-
-                if not self.check_validity(node):
-                    continue
-
-                if idx_node in record_closed:
-                    continue
-
-                if idx_node not in record_open:
-                    record_open[idx_node] = node
-                else:
-                    if record_open[idx_node].cost > node.cost:
-                        record_open[idx_node] = node
-
-        x_out_path, y_out_path = self.calc_final_path(end_node, record_closed)
-
-        return x_out_path, y_out_path
-
-def mainAstar(image):
-    start_x = 177
-    start_y = 218
-    end_x = 177
-    end_y = 25
-    grid_size = 4.0
-    robot_radius = 20.0
-
-    #image = cv.imread(image)
-    #image = cv.resize(image, (200,200))
-
-    gray = cv.resize(image, (600, 400))
-    (width, length, _) = gray.shape
-
-    x_obstacle, y_obstacle = [], []
-    for i in range(width):
-        for j in range(length):
-            if gray[i][j][0] >= 150:
-              y_obstacle.append(i)
-              x_obstacle.append(j)
-
-
-    if show_animation:
-        print('sdfsdf')
-        plt.plot(x_obstacle, y_obstacle, ".k")
-        plt.plot(start_x, start_y, "og")
-        plt.plot(end_x, end_y, "xb")
-        plt.grid(True)
-        plt.axis("equal")
-
-    print('started astar')
-    a_star = AStarPath(robot_radius, grid_size, x_obstacle, y_obstacle)
-
-    x_out_path, y_out_path = a_star.a_star_search(start_x, start_y, end_x, end_y)
-
-    # if show_animation:
-    #     plt.plot(x_out_path, y_out_path, "r")
-    #     plt.show()
-
-
-
-
-
-
+import queue
 
 
 class HighCamera:
@@ -240,6 +52,14 @@ class HighCamera:
         video_name = path
         self.capture = cv.VideoCapture(video_name)
         self.frame_counter = 1
+
+        #  path constructor
+        self.map_img = None
+        self.added_dots = []
+        self.p = 9
+
+
+    
 
 
     # Debug boy
@@ -302,39 +122,213 @@ class HighCamera:
 
         return new_contours 
     
-    def GetRectFromButtons(self):
-        pass
 
     """ Path constructor """
-    def MakeMapImage(self, frame):
-        map_frame = np.zeros((frame.shape[0] + 200, frame.shape[1] + 200, frame.shape[2]))
-        # Draw field
-        cv.drawContours(map_frame, (self.field.contour,), -1, (255, 255, 255), 4)
+    def DrawStatic(self, frame, color, thikness=0):
+        field_cnt_scaled = self.field.contour.copy()
+        for i in range(len(field_cnt_scaled)):
+            field_cnt_scaled[i] = np.divide(field_cnt_scaled[i], self.p)
 
-        # Draw walls
+        cv.drawContours(frame, (field_cnt_scaled,), 0, color, thikness)
+        #cv.imshow('frame', self.Scale(self.map_img, scale_down=int(self.p / 1.3)))
+        #cv.waitKey(0)
+
         for line in self.walls.lines:
-            cv.line(map_frame, line[0], line[1], (255, 255, 255), 3)
+            cv.line(frame, (line[0][0] // self.p, line[0][1] // self.p) , (line[1][0] // self.p, line[1][1] // self.p), color, thikness+1)
 
-        # Draw table
-        cv.drawContours(map_frame, (self.table.contour,), -1, (255,255,255), -1) 
+        new_table_cnt = self.table.contour.copy()
+        for i in range(len(field_cnt_scaled)):
+            new_table_cnt[i] = np.divide(new_table_cnt[i], self.p)
+        cv.drawContours(frame, (new_table_cnt,), -1, color, thikness)
+        #cv.imshow('frame', self.Scale(self.map_img, scale_down=int(self.p / 1.3)))
+        #cv.waitKey(0)
 
-        # Draw buttons
-        # for color in self.buttons.map:
-        #     button = self.buttons[color]
-        #     if button.contour is not None:
-        #         cv.drawContours(map_frame, (button.contour,), -1, (255,255,255), -1)
+        for bucket in self.listBuckets:
+            a, b, c, d = bucket.top_left_coords, bucket.top_right_coords, bucket.bottom_right_coords, bucket.bottom_left_coords
+            a = a[0] // self.p, a[1] // self.p
+            b = b[0] // self.p, b[1] // self.p
+            c = c[0] // self.p, c[1] // self.p
+            d = d[0] // self.p, d[1] // self.p
 
+            cv.line(frame, a, b, color, thikness+1)
+            cv.line(frame, b, c, color, thikness+1)
+            cv.line(frame, c, d, color, thikness+1)
+            cv.line(frame, d, a, color, thikness+1)
 
-        # Draw buckets
+    def DrawDynamic(self, frame, color, thikness=0):
+        for b_color in self.buttons.map:
+            button = self.buttons[b_color]
+
+            if button.contour is not None:
+                new_but_contour =  button.contour.copy()
+                for i in range(len(new_but_contour)):
+                    new_but_contour[i] = np.divide(new_but_contour[i], self.p)
+                
+                cv.drawContours(frame, (new_but_contour,), -1, color, thikness * 2)
+
+        # robot
         # ...
 
+        # value objects
+        for i in range(len(self.listValueObjects)):
+            if self.listValueObjects[i].contour is not None:
+                cnt1 = self.listValueObjects[i].contour.copy()
+                for i in range(len(cnt1)):
+                    cnt1[i] = np.divide(cnt1[i], self.p)
 
-        cv.imshow('frame', self.Scale(map_frame))
+                cv.drawContours(frame, (cnt1,), -1, color, thikness)
+
+
+
+
+    def MakeMapImage(self, frame):
+        a_ = (frame.shape[0] + 200) + (self.p - ((frame.shape[0] + 200) % self.p))
+        b_ = (frame.shape[1]) + (self.p - (frame.shape[1] % self.p))
+
+        a__ = a_ // self.p
+        b__ = b_ // self.p
+
+
+        self.map_img = np.zeros((a__, b__, frame.shape[2]))
+        white = (255, 255, 255)
+        purple = (254, 0, 254)
+
+        self.DrawStatic(self.map_img, purple, 6)
+        self.DrawDynamic(self.map_img, purple, 6)
+
+        self.DrawStatic(self.map_img, white, 0)
+        self.DrawDynamic(self.map_img, white, 0)
+
+        
+        cv.imshow('frame', self.Scale(self.map_img, scale_down=int(self.p / 1.3)))
         cv.waitKey(0)
-        print('finish my frame')
-        return map_frame
-
     
+
+    def CanBe(self, s, t, v):
+        return True
+
+    # v - 0, 1, 2, 3, 4, 5, 6, 7 -> t, tr, t, br, b, bl, l, tl 
+    def MakePath(self, s, t, v):
+        robot_w = 50
+        robot_h = 30
+
+        robot_w = (robot_w + self.p - 1) // self.p
+        robot_h = (robot_h + self.p - 1) // self.p
+
+        s = s[1], s[0]
+        t = t[1], t[0]
+
+
+        n, m =  self.map_img.shape[0], self.map_img.shape[1]
+        # 131 208
+        #print(n, m)
+        dists = [[10**9 for _ in range(m)] for _ in range(n)]
+        prevs = [[None for _ in range(m)] for _ in range(n)]
+        used = [[False for _ in range(m)] for _ in range(n)]
+
+
+        dists[s[0]][s[1]] = 0
+
+        q = queue.PriorityQueue()
+        q.put((0, s[0], s[1], v))
+        
+        def GetK(x, y):
+            m = {
+                255: 10**4,
+                254: 10**2,
+                0: 1,
+            }
+
+            return m[self.map_img[to_x][to_y][0]]
+
+        while not q.empty():
+            c_cur, x, y, v = q.get()
+            used[x][y] = True;
+
+            if dists[x][y] < c_cur:
+                continue
+
+            top_cost = 1
+            right_cost = 1
+            left_cost = 1
+            bottom_cost = 1
+
+            if v == 't':
+                right_cost = left_cost = 3
+                bottom_cost = 5
+            elif v == 'b':
+                right_cost = left_cost = 3
+                top_cost = 5
+            elif v == 'r':
+                top_cost = bottom_cost = 3
+                left_cost = 5
+            elif v == 'l':
+                top_cost = bottom_cost = 3
+                right_cost = 5
+
+            #print(x, y)
+            to_x, to_y = x, y - 1
+            k = 1
+            if to_y >= 0 and not used[to_x][to_y]:
+                k = GetK(to_x, to_y)
+
+                if dists[to_x][to_y] > dists[x][y] + top_cost*k:
+                    dists[to_x][to_y] = dists[x][y] + top_cost*k
+                    prevs[to_x][to_y] = (x, y)
+                    q.put((dists[to_x][to_y], to_x, to_y, 't'))
+
+            to_x, to_y = x, y + 1
+            if to_y < self.map_img.shape[1] and not used[to_x][to_y]:
+                k = GetK(to_x, to_y)
+
+
+                if dists[to_x][to_y] > dists[x][y] + bottom_cost*k:
+                    dists[to_x][to_y] = dists[x][y] + bottom_cost*k
+                    prevs[to_x][to_y] = (x, y)
+                    q.put((dists[to_x][to_y], to_x, to_y, 'b'))
+
+            to_x, to_y = x + 1, y
+            if to_x < self.map_img.shape[0] and not used[to_x][to_y]:
+                k = GetK(to_x, to_y)
+
+
+                if dists[to_x][to_y] > dists[x][y] + right_cost*k:
+                    dists[to_x][to_y] = dists[x][y] + right_cost*k
+                    prevs[to_x][to_y] = (x, y)
+                    q.put((dists[to_x][to_y], to_x, to_y, 'r'))
+
+            to_x, to_y = x - 1, y
+            if to_x >= 0 and not used[to_x][to_y]:
+                k = GetK(to_x, to_y)
+
+
+                if dists[to_x][to_y] > dists[x][y] + left_cost*k:
+                    dists[to_x][to_y] = dists[x][y] + left_cost*k
+                    prevs[to_x][to_y] = (x, y)
+                    q.put((dists[to_x][to_y], to_x, to_y, 'l'))
+
+
+        path = [t]
+
+        x, y = t
+        while prevs[x][y] != None:
+            x, y = prevs[x][y]
+            path.append((x, y))
+
+        for i in range(len(path) - 1, -1, -1):
+            x, y = path[i]
+            self.map_img[x][y] = (255, 0, 0)
+            #print(self.map_img[to_x][to_y] )
+
+        self.map_img[s[0]][s[1]] = (10, 255, 10)
+        self.map_img[t[0]][t[1]] = (10, 255, 10)
+
+        cv.imshow('frame', self.Scale(self.map_img, scale_down=int(self.p / 1.3)))
+        cv.waitKey(0)
+
+        return path
+
+
 
 
     """ Initialize field """
@@ -1433,24 +1427,20 @@ class HighCamera:
             cv.imshow('frame', self.Scale(frame))
             #cv.waitKey(0)
 
-            #mainAstar(
-            
-             #   ) 
+            self.MakeMapImage(frame)
 
         self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
         self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
 
         if self.frame_counter % 20 == 0:
-            #self.MakeMapImage(frame)
-            #cv.imshow('frame', self.Scale(frame))
-            #cv.waitKey(0)
-
-
             self.UpdatePairButton(frame_hsv, 'blue', 'red', frame)
             self.UpdatePairButton(frame_hsv, 'orange', 'green', frame)
 
             self.UpdateValueObjects(0, frame_hsv, frame)
             self.UpdateValueObjects(1, frame_hsv, frame)
+
+            self.MakeMapImage(frame)
+            self.MakePath((70, 30), (140, 60), 't')
 
 
         if not self.ShowPolygon(frame):
