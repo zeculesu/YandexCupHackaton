@@ -5,11 +5,12 @@ import time
 
 
 class Server:
-    def __init__(self, port, motor, camera, manipulator):
+    def __init__(self, port, motor, camera, manipulator, rgb_panel):
         self.port = port
         self.motor = motor
         self.manipulator = manipulator
         self.camera = camera
+        self.rgb_panel = rgb_panel
 
         self.server_socket = None
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -35,9 +36,9 @@ class Server:
                 message = client_socket.recv(1024).decode('utf-8')
                 if not message:
                     break
-                print(f"Получено сообщение: {message}")
+                # print(f"Получено сообщение: {message}")
                 self.read_request(message)
-                client_socket.send("Сообщение получено".encode('utf-8'))
+                client_socket.send("OK".encode('utf-8'))
             except Exception as e:
                 print(e)
         client_socket.close()
@@ -56,7 +57,7 @@ class Server:
             else:
                 command = command_line[0]
 
-            if 0 <= command <= 8:
+            if 0 <= command <= 9:
                 if command == 0:
                     self.motor.stop()
                 elif command == 1:
@@ -75,6 +76,9 @@ class Server:
                     self.motor.left_forward()
                 elif command == 8:
                     self.motor.left_backward()
+                # TODO ЭТО ТОЛЬКО ТЕСТОВОЕ ИСЛПОЬЗОВАТЬ НЕЛЬЗЯ
+                elif command == 9:
+                    self.motor.forward(val)
 
             elif 10 <= command <= 29:
                 if command == 10:
@@ -91,7 +95,7 @@ class Server:
 
                 elif command == 14:
                     self.manipulator.set_down_position()
-                #todo вырывает провод
+
                 elif command == 15:
                     self.manipulator.move_main(val)
 
@@ -117,5 +121,10 @@ class Server:
                     self.camera.move_cubit(val)
                 elif command == 32:
                     self.camera.move_rotate(val)
+
+            elif 41 <= command <= 50:
+                if command == 42:
+                    self.rgb_panel.set_all([val]*8)
+                    self.rgb_panel.set_all_power([val]*8)
         except Exception as e:
             return

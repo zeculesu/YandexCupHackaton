@@ -1456,5 +1456,3 @@ class HighCamera:
     def run(self):
         while self.MakeIteration():
             pass
-
-

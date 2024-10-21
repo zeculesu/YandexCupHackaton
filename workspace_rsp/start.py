@@ -13,9 +13,10 @@ rgb = RGBPanel()
 beep = Buzzer()
 port = cfg.PORT
 
-server = Server(port, motor, camera, manipulator)
+server = Server(port, motor, camera, manipulator, rgb)
 
 # TODO раскидать по папочкам
 
 print("Start")
 server.start_server()
+

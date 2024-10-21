@@ -45,11 +45,11 @@ class Sender:
             self.logger.info("Подключение к серверу...")
             self.create_socket()
             self.connect()
+            return True
         except ConnectionError:
             self.logger.info("Подключение оборвалось...")
             self.socket_close()
             return False
-        return True
 
     def try_connection(self):
         for i in range(5):

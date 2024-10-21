@@ -1,3 +1,6 @@
+from AppOpenCv.App.config import *
+
+from AppOpenCv.App.sender import Sender
 import socket
 from time import sleep
 
@@ -9,7 +12,7 @@ from time import sleep
 # в САМОМ конце работы надо закрыть сокет с помощью sender.socket_close()
 
 
-class Sender:
+class Sender324:
     def __init__(self, host, port):
         self.host = host
         self.port = port
@@ -46,32 +49,36 @@ class Sender:
 
         return True
 
+    def try_connection(self):
+        for i in range(5):
+            if self.start_client():
+                return True
+            sleep(5)
+        return False
 
-def try_connection(self):
-    for i in range(5):
-        if self.start_client():
-            return True
-        sleep(5)
-    return False
+    def check_connection(self):
+        return True if self.socket else False
 
-
-def check_connection(self):
-    return True if self.socket else False
-
-
-def send_command(self, command):
-    if not self.check_connection():
-        if not self.try_connection():
-            return False
-    resp = self.send(command)
-    return self.handle_response(resp, command)
-
-
-def handle_response(self, resp, command):
-    if not resp:
-        if not self.try_connection():
-            return False
+    def send_command(self, command):
+        if not self.check_connection():
+            if not self.try_connection():
+                return False
         resp = self.send(command)
+        return self.handle_response(resp, command)
+
+    def handle_response(self, resp, command):
         if not resp:
-            return False
-    return True
+            if not self.try_connection():
+                return False
+            resp = self.send(command)
+            if not resp:
+                return False
+        return True
+
+
+sender = Sender("192.168.2.156", 4141)
+sender.start_client()
+sender.send_command("42 4")
+sleep(5)
+sender.send_command("42 1")
+# exec(open("send_command_console_python.py").read())

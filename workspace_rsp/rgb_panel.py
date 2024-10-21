@@ -31,6 +31,10 @@ class RGBPanel:
         for i, color in enumerate(colors):
             self.set_led(cfg.RGB_PANEL, i + 1, color)
 
+    def set_all_power(self, colors: List[int]) -> None:
+        for i, color in enumerate(colors):
+            self.set_led(cfg.RGB_POWER, i + 1, color)
+
     def turn_off(self) -> None:
         self.set_all([cfg.BLACK] * 8)
 
