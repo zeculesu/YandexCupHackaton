@@ -21,8 +21,8 @@ class ColoredFormatter(logging.Formatter):
         'DEBUG': '\033[94m',  # Blue
         'INFO': '\033[92m',   # Green
         'WARNING': '\033[93m',# Yellow
-        'ERROR': '\033[33m',  # Orange
-        'CRITICAL': '\033[91m', # Red background
+        'ERROR': '\033[91m',  # Orange
+        'CRITICAL': '\033[41m', # Red background
     }
     RESET = '\033[0m'  # Reset to default color
 

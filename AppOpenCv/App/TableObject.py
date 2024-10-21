@@ -1,10 +1,10 @@
-from Object import Obj
+from Field import Field
 from Owner import Owner
 
 import numpy as np
 
 
-class TableObj(Obj):
+class TableObj(Field):
     def __init__(self, is_special: bool = False):
         super().__init__()
         self.is_lower_color = np.array(None) 

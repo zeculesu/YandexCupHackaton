@@ -20,3 +20,6 @@ class Rectangle:
                           CalculateDistance(self.C, self.B) / CalculateDistance(self.B, self.A))
         self.contour = contour
 
+        # A B
+        # D C
+
